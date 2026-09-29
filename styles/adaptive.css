@@ -1,12 +1,18 @@
 /* =========================================================
-   MISS NAILS — ADAPTACIÓN POR ESPACIO
+   MISS NAILS — ADAPTIVE HEADER V5
+   Principio: la presentación responde al espacio disponible
+   del componente, no a la identidad del dispositivo.
 
-   Fuente única:
-   - Este archivo vive en /styles.
-   - /www es salida generada por build:web.
-   - No clasifica dispositivos por ancho de viewport.
-   - La presentación responde al espacio disponible del
-     App Shell y de cada componente.
+   Base compacta:
+   - logo + notificaciones
+   - búsqueda debajo
+   - navegación inferior fija
+
+   Espacio amplio:
+   - logo
+   - búsqueda amplia
+   - carrito
+   - cuenta + menú contextual
    ========================================================= */
 
 .mn-app{
@@ -25,7 +31,7 @@
 }
 
 /* =========================================================
-   HEADER COMPACTO
+   BASE: HEADER COMPACTO
    ========================================================= */
 
 .mn-header-inner{
@@ -37,44 +43,130 @@
 
 .mn-brand{
   order:1;
-  flex:0 0 auto;
+  flex:1 1 auto;
+  min-width:0;
+  display:flex;
+  align-items:center;
+}
+
+.mn-brand-logo{
+  display:block;
+  width:min(43vw,156px);
+  max-width:100%;
+  height:auto;
+  max-height:46px;
+  object-fit:contain;
 }
 
 .mn-notification{
   order:2;
-  flex:0 0 auto;
+  display:grid !important;
+  place-items:center;
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  visibility:visible;
+  opacity:1;
 }
 
+.mn-notification svg{
+  display:block;
+  width:20px;
+  height:20px;
+}
+
+/* La búsqueda ocupa una fila completa debajo de marca/campana. */
 .mn-search{
   order:3;
-  flex:1 1 100%;
+  flex:1 0 100%;
+  width:100%;
   min-width:0;
-  display:none;
+  height:44px;
+  display:flex !important;
+  visibility:visible;
+  opacity:1;
+  border-color:#222;
+  background:#fff;
 }
 
+.mn-search-icon{
+  color:#555;
+}
+
+.mn-search-input{
+  color:var(--texto);
+}
+
+.mn-search-input::placeholder{
+  color:#777;
+  opacity:1;
+}
+
+.mn-search-submit{
+  display:grid;
+  place-items:center;
+}
+
+/* Una sola estructura de navegación; en compacto sus cuatro
+   elementos forman la barra inferior. */
 .mn-main-nav{
   order:4;
-  flex:1 1 100%;
-  margin:0;
-  display:grid;
+  position:fixed !important;
+  left:0 !important;
+  right:0 !important;
+  top:auto !important;
+  bottom:0 !important;
+  z-index:100;
+  width:100%;
+  margin:0 !important;
+  padding:7px max(7px,calc(7px + var(--safe-right)))
+           calc(7px + var(--safe-bottom))
+           max(7px,calc(7px + var(--safe-left)));
+  display:grid !important;
   grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:stretch;
   gap:2px;
+  background:rgba(255,255,255,.98);
+  border-top:1px solid var(--borde);
+  box-shadow:0 -4px 14px rgba(0,0,0,.06);
+}
+
+.mn-main-nav > .mn-nav-item[data-view="catalogo"],
+.mn-main-nav > .mn-nav-item[data-view="carrito"],
+.mn-main-nav > .mn-nav-item[data-view="pedidos"]{
+  display:flex !important;
+}
+
+.mn-account-menu-wrap{
+  min-width:0;
+  display:flex;
+  align-items:stretch;
+}
+
+.mn-account-menu-wrap > .mn-nav-item[data-view="cuenta"]{
+  flex:1 1 auto;
+}
+
+.mn-account-menu-wrap > .mn-nav-item[data-view="cuenta"]{
+  display:flex !important;
+}
+
+.mn-account-menu{
+  display:none !important;
 }
 
 .mn-nav-item{
   min-width:0;
   min-height:54px;
   padding:6px 2px;
+  border-radius:10px;
   flex-direction:column;
   gap:3px;
   font-size:10px;
 }
 
-.mn-nav-item[data-view="catalogo"],
-.mn-nav-item[data-view="pedidos"],
-.mn-nav-item[data-view="carrito"],
-.mn-nav-item[data-view="cuenta"]{
-  display:flex;
+.mn-nav-icon{
+  font-size:19px;
 }
 
 .mn-content{
@@ -83,28 +175,7 @@
 }
 
 /* =========================================================
-   MARCA / NOTIFICACIONES
-   ========================================================= */
-
-.mn-brand-logo{
-  width:min(43vw,156px);
-  max-height:58px;
-  object-fit:contain;
-}
-
-.mn-notification{
-  width:38px;
-  height:38px;
-  flex:0 0 38px;
-}
-
-.mn-notification svg{
-  width:20px;
-  height:20px;
-}
-
-/* =========================================================
-   CATÁLOGO
+   CATÁLOGO — MISMA ESTRUCTURA, ADAPTACIÓN DE ESPACIO
    ========================================================= */
 
 .mn-view-head{
@@ -124,7 +195,6 @@
   margin:8px 0 12px;
 }
 
-/* La tira de categorías usa el ancho real disponible. */
 .mn-categories{
   display:flex;
   align-items:center;
@@ -146,7 +216,6 @@
   white-space:nowrap;
 }
 
-/* La cuadrícula decide automáticamente cuántas tarjetas caben. */
 .mn-catalog-grid{
   grid-template-columns:repeat(auto-fit,minmax(min(100%,148px),1fr));
   gap:10px;
@@ -201,10 +270,6 @@
   min-height:1px;
 }
 
-/* =========================================================
-   OTRAS VISTAS
-   ========================================================= */
-
 .mn-home-grid{
   grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
   gap:12px;
@@ -219,85 +284,159 @@
 
 /* =========================================================
    ESPACIO AMPLIO DEL HEADER
-   El umbral pertenece al componente header, no al dispositivo.
+   Umbral del COMPONENTE HEADER, no del dispositivo.
    ========================================================= */
 
 @container header (min-width:900px){
 
   .mn-header-inner{
     display:grid;
-    grid-template-columns:minmax(150px,auto) minmax(280px,1fr) auto minmax(max-content,auto);
+    grid-template-columns:max-content minmax(420px,1fr) max-content;
     align-items:center;
-    gap:16px;
+    gap:18px;
     flex-wrap:nowrap;
   }
 
   .mn-brand{
-    order:0;
+    order:1;
+    width:max-content;
+    max-width:100%;
+    flex:0 0 auto;
+  }
+
+  .mn-brand-logo{
+    width:182px;
+    max-width:182px;
+    height:44px;
+    max-height:44px;
+    object-fit:contain;
   }
 
   .mn-search{
-    order:0;
-    flex:1 1 auto;
+    order:2;
+    width:auto;
     min-width:0;
+    height:44px;
+    flex:1 1 auto;
   }
 
   .mn-notification{
-    order:0;
+    display:none !important;
   }
 
   .mn-main-nav{
-    order:0;
-    display:flex;
-    flex:0 0 auto;
-    margin-left:0;
+    order:3;
+    position:static !important;
+    width:max-content;
+    min-width:0;
+    margin:0 !important;
+    padding:0 !important;
+    display:flex !important;
+    align-items:center;
+    justify-content:flex-end;
     gap:6px;
+    background:transparent;
+    border:0;
+    box-shadow:none;
   }
 
-  .mn-nav-item{
+  .mn-main-nav > .mn-nav-item[data-view="catalogo"],
+  .mn-main-nav > .mn-nav-item[data-view="pedidos"]{
+    display:none !important;
+  }
+
+  .mn-main-nav > .mn-nav-item[data-view="carrito"]{
+    display:flex !important;
     min-height:44px;
     padding:9px 12px;
     flex-direction:row;
     font-size:inherit;
   }
 
-  .mn-nav-icon{
-    font-size:18px;
+  .mn-account-menu-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
   }
 
-  .mn-brand-logo{
-    width:min(182px,18cqi);
-    max-height:68px;
+  .mn-account-menu-wrap > .mn-nav-item[data-view="cuenta"]{
+    display:flex !important;
+    min-height:44px;
+    padding:9px 12px;
+    flex-direction:row;
+    font-size:inherit;
+  }
+
+  /* Menú accesible por mouse y teclado, sin JS adicional. */
+  .mn-account-menu-wrap:hover .mn-account-menu,
+  .mn-account-menu-wrap:focus-within .mn-account-menu{
+    display:flex !important;
+  }
+
+  .mn-account-menu{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    z-index:120;
+    width:280px;
+    max-height:min(70vh,620px);
+    overflow:auto;
+    flex-direction:column;
+    padding:12px 0;
+    background:#fff;
+    border:1px solid var(--borde);
+    border-radius:14px;
+    box-shadow:0 12px 30px rgba(42,31,37,.14);
+  }
+
+  .mn-account-menu::before{
+    content:"";
+    position:absolute;
+    top:-7px;
+    right:34px;
+    width:14px;
+    height:14px;
+    background:#fff;
+    border-left:1px solid var(--borde);
+    border-top:1px solid var(--borde);
+    transform:rotate(45deg);
+  }
+
+  .mn-account-menu a{
+    display:flex;
+    align-items:center;
+    min-height:40px;
+    padding:8px 18px;
+    color:var(--texto);
+    text-decoration:none;
+    font-size:14px;
+    white-space:nowrap;
+  }
+
+  .mn-account-menu a:hover,
+  .mn-account-menu a:focus-visible{
+    background:var(--rosa-claro);
+    color:var(--rosa-oscuro);
+    outline:none;
+  }
+
+  .mn-account-menu-divider{
+    height:1px;
+    margin:8px 14px;
+    background:var(--borde);
   }
 
   .mn-content{
     padding-top:28px;
     padding-bottom:calc(40px + var(--safe-bottom));
   }
-
-  .mn-search{
-    visibility:visible;
-  }
-}
-
-/* En espacios compactos, la búsqueda se reserva para catálogo
-   cuando el componente tenga realmente espacio para mostrarla. */
-.mn-app:not([data-view="catalogo"]) .mn-search{
-  display:none;
-}
-
-@container header (min-width:900px){
-  .mn-app:not([data-view="catalogo"]) .mn-search{
-    display:flex;
-  }
 }
 
 /* =========================================================
-   CONTENIDO AMPLIO
+   CONTENIDO: LOS COMPONENTES RESPONDEN A SU PROPIO ESPACIO
    ========================================================= */
 
 @container content (min-width:760px){
-
   .mn-catalog-grid{
     grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
     gap:16px;
@@ -309,12 +448,7 @@
   }
 }
 
-/* =========================================================
-   CONTENIDO MUY COMPACTO
-   ========================================================= */
-
 @container content (max-width:500px){
-
   .mn-view-head h1{
     font-size:25px;
   }
@@ -339,14 +473,6 @@
     font-size:15px;
   }
 }
-
-/* =========================================================
-   ORIENTACIÓN
-
-   No decide el layout por dispositivo: solamente permite
-   aprovechar el espacio adicional cuando la orientación
-   realmente cambia el espacio disponible.
-   ========================================================= */
 
 @media (orientation:landscape){
   .mn-content{
