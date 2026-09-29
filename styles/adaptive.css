@@ -30,6 +30,15 @@
   container-name:content;
 }
 
+/* El navegador está posicionando la barra fixed dentro del bloque
+   contenedor del header. Conservamos la arquitectura de container
+   queries y calculamos únicamente la coordenada vertical de la barra
+   para que su borde inferior coincida con el viewport. */
+:root{
+  --mn-mobile-nav-height:calc(68px + var(--safe-bottom));
+  --mn-header-top-inset:calc(12px + var(--safe-top));
+}
+
 /* =========================================================
    BASE: HEADER COMPACTO
    ========================================================= */
@@ -114,10 +123,11 @@
   position:fixed !important;
   left:0 !important;
   right:0 !important;
-  top:auto !important;
-  bottom:0 !important;
+  top:calc(100dvh - var(--mn-mobile-nav-height) - var(--mn-header-top-inset)) !important;
+  bottom:auto !important;
   z-index:100;
   width:100%;
+  height:var(--mn-mobile-nav-height);
   margin:0 !important;
   padding:7px max(7px,calc(7px + var(--safe-right)))
            calc(7px + var(--safe-bottom))
