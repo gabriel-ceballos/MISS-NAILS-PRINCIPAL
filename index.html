@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="./styles/core.css">
 <link rel="stylesheet" href="./styles/adaptive.css">
 </head>
+<body>
 <div class="mn-app">
 <header class="mn-header"><div class="mn-header-inner"><a class="mn-brand" href="#catalogo" aria-label="MISS NAILS — ir al catálogo"><img class="mn-brand-logo" src="./assets/logo.png" alt="Miss Nails — Professional Nail System"></a><form class="mn-search" id="mn-search-form" role="search"><span class="mn-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></span><input class="mn-search-input" id="mn-search-input" type="search" placeholder="Buscar productos, marcas o categorías" autocomplete="off" enterkeyhint="search" aria-label="Buscar productos, marcas o categorías"><button class="mn-search-submit" type="submit" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></button></form><button class="mn-notification" type="button" aria-label="Notificaciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="mn-notification-count">0</span></button>
 <nav class="mn-main-nav" aria-label="Navegación principal">
@@ -19,7 +20,33 @@
 <a class="mn-nav-item" data-view="cuenta" href="#cuenta"><span class="mn-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.8-3.2 3.1-5 7-5s6.2 1.8 7 5"></path></svg></span><span>Cuenta</span></a>
 </nav></div></header>
 <main class="mn-content">
-<section class="mn-view" data-view-panel="catalogo"><div class="mn-view-head"><h1>Catálogo</h1><p>Encuentra productos, marcas o categorías.</p></div><div class="mn-search-status" id="mn-search-status" aria-live="polite"></div><div class="mn-catalog-grid"><article class="mn-product"><div class="mn-product-image">PRODUCTO 01</div><div class="mn-product-body"><p class="mn-product-name">Producto de prueba</p><p class="mn-product-price">$0.00</p></div></article><article class="mn-product"><div class="mn-product-image">PRODUCTO 02</div><div class="mn-product-body"><p class="mn-product-name">Producto de prueba</p><p class="mn-product-price">$0.00</p></div></article><article class="mn-product"><div class="mn-product-image">PRODUCTO 03</div><div class="mn-product-body"><p class="mn-product-name">Producto de prueba</p><p class="mn-product-price">$0.00</p></div></article><article class="mn-product"><div class="mn-product-image">PRODUCTO 04</div><div class="mn-product-body"><p class="mn-product-name">Producto de prueba</p><p class="mn-product-price">$0.00</p></div></article></div></section>
+<section class="mn-view" data-view-panel="catalogo">
+  <header class="mn-view-head">
+    <h1>Catálogo</h1>
+    <p>Encuentra productos, marcas o categorías.</p>
+  </header>
+
+  <section
+    class="mn-categories"
+    id="mn-category-strip"
+    aria-label="Categorías">
+  </section>
+
+  <div
+    class="mn-search-status"
+    id="mn-search-status"
+    aria-live="polite">
+  </div>
+
+  <section
+    class="mn-catalog-grid"
+    id="mn-products"
+    aria-live="polite">
+  </section>
+
+  <div id="mn-catalog-sentinel" aria-hidden="true"></div>
+</section>
+
 <section class="mn-view" data-view-panel="carrito"><div class="mn-view-head"><h1>Carrito</h1><p>Vista preparada para la futura lógica real del carrito.</p></div><div class="mn-empty">Tu carrito está vacío en esta maqueta.</div></section>
 <section class="mn-view" data-view-panel="pedidos"><div class="mn-view-head"><h1>Pedidos</h1><p>Aquí se mostrarán los pedidos y su estado.</p></div><div class="mn-empty">Todavía no hay pedidos de demostración.</div></section>
 <section class="mn-view" data-view-panel="cuenta"><div class="mn-view-head"><h1>Mi cuenta</h1><p>La vista de cuenta existente ahora vive dentro del App Shell.</p></div><section class="mn-profile"><div class="avatar">GC</div><div class="profile-copy"><h2>Gabriel Ceballos</h2><p>gabriel@ejemplo.com</p></div><button class="profile-action">Editar perfil</button></section><section class="account-list">

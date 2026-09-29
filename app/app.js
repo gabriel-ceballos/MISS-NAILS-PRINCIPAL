@@ -1,6 +1,6 @@
 import {applyRuntimeContext, updateDynamicContext} from './runtime/context.js';
 import {createRouter} from './navigation/router.js';
-import {initSearch} from './features/search.js';
+import {initCatalog} from './features/catalog.js';
 
 const app=document.querySelector('.mn-app');
 
@@ -10,7 +10,7 @@ if(!app){
 
 applyRuntimeContext(app);
 createRouter(app);
-initSearch();
+initCatalog();
 
 let frame=0;
 function refreshContext(){
