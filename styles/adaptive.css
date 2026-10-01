@@ -500,3 +500,55 @@
     padding-top:14px;
   }
 }
+/* =========================================================
+   MISS NAILS — CARRITO MÓVIL WEB
+   HEADER CONTEXTUAL — V4
+   ========================================================= */
+
+@media screen and (max-width:899px){
+
+  .mn-app[data-view="carrito"] .mn-header{
+    height:0 !important;
+    min-height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    border:0 !important;
+    box-shadow:none !important;
+  }
+
+  .mn-app[data-view="carrito"] .mn-header-inner{
+    height:0 !important;
+    min-height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    gap:0 !important;
+  }
+
+  .mn-app[data-view="carrito"] .mn-brand,
+  .mn-app[data-view="carrito"] .mn-search,
+  .mn-app[data-view="carrito"] .mn-notification{
+    display:none !important;
+  }
+
+  .mn-app[data-view="carrito"] .mn-main-nav{
+    display:grid !important;
+    position:fixed !important;
+    left:0 !important;
+    right:0 !important;
+    top:auto !important;
+    bottom:0 !important;
+    z-index:100;
+    width:100%;
+    height:auto;
+    min-height:
+      var(--mn-mobile-nav-height,
+      calc(68px + var(--safe-bottom)));
+    margin:0 !important;
+  }
+
+  .mn-app[data-view="carrito"] .mn-content{
+    padding-top:16px;
+    padding-bottom:calc(94px + var(--safe-bottom));
+  }
+
+}
