@@ -12,55 +12,171 @@
 </head>
 <body>
 <div class="mn-app">
-<header class="mn-header"><div class="mn-header-inner"><a class="mn-brand" href="#catalogo" aria-label="MISS NAILS — ir al catálogo"><img class="mn-brand-logo" src="./assets/logo.png" alt="Miss Nails — Professional Nail System"></a><form class="mn-search" id="mn-search-form" role="search"><span class="mn-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></span><input class="mn-search-input" id="mn-search-input" type="search" placeholder="Buscar productos, marcas o categorías" autocomplete="off" enterkeyhint="search" aria-label="Buscar productos, marcas o categorías"><button class="mn-search-submit" type="submit" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></button></form><button class="mn-notification" type="button" aria-label="Notificaciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="mn-notification-count">0</span></button>
-<nav class="mn-main-nav" aria-label="Navegación principal">
-<a class="mn-nav-item" data-view="catalogo" href="#catalogo"><span class="mn-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"></path><path d="M5 9v11h14V9"></path><path d="M9 20v-6h6v6"></path></svg></span><span>Catálogo</span></a>
-<a class="mn-nav-item" data-view="carrito" href="#carrito"><span class="mn-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L20 8H6"></path></svg></span><span>Carrito</span></a>
-<a class="mn-nav-item" data-view="pedidos" href="#pedidos"><span class="mn-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v13H5z"></path><path d="M8 7V5h8v2"></path><path d="M8 11h8M8 15h5"></path></svg></span><span>Pedidos</span></a>
-<a class="mn-nav-item" data-view="cuenta" href="#cuenta"><span class="mn-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.8-3.2 3.1-5 7-5s6.2 1.8 7 5"></path></svg></span><span>Cuenta</span></a>
-</nav></div></header>
+<header class="mn-header">
+  <div class="mn-header-inner">
+
+    <a class="mn-brand" href="#catalogo" aria-label="MISS NAILS — ir al catálogo">
+      <img class="mn-brand-logo" src="./assets/logo.png" alt="Miss Nails — Professional Nail System">
+    </a>
+
+    <form class="mn-search" id="mn-search-form" role="search">
+      <span class="mn-search-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-4-4"></path>
+        </svg>
+      </span>
+      <input class="mn-search-input" id="mn-search-input" type="search"
+        placeholder="Buscar productos, marcas o categorías"
+        autocomplete="off" enterkeyhint="search"
+        aria-label="Buscar productos, marcas o categorías">
+      <button class="mn-search-submit" type="submit" aria-label="Buscar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-4-4"></path>
+        </svg>
+      </button>
+    </form>
+
+    <button class="mn-notification" type="button" aria-label="Notificaciones">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+        <path d="M10 21h4"></path>
+      </svg>
+      <span class="mn-notification-count">0</span>
+    </button>
+
+    <nav class="mn-main-nav" aria-label="Navegación principal">
+
+      <a class="mn-nav-item" data-view="catalogo" href="#catalogo">
+        <span class="mn-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9.5 12 3l9 6.5"></path>
+            <path d="M5 9v11h14V9"></path>
+            <path d="M9 20v-6h6v6"></path>
+          </svg>
+        </span>
+       <span>Catálogo</span>
+      </a>
+ 
+      <a class="mn-nav-item" data-view="carrito" href="#carrito">
+        <span class="mn-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="20" r="1"></circle>
+            <circle cx="18" cy="20" r="1"></circle>
+            <path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L20 8H6"></path>
+          </svg>
+        </span>
+        <span>Carrito</span>
+      </a>
+
+      <a class="mn-nav-item" data-view="pedidos" href="#pedidos">
+        <span class="mn-nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 7h14v13H5z"></path>
+            <path d="M8 7V5h8v2"></path>
+            <path d="M8 11h8M8 15h5"></path>
+          </svg>
+        </span>
+        <span>Pedidos</span>
+      </a>
+
+      <div class="mn-account-menu-wrap">
+        <a class="mn-nav-item" data-view="cuenta" href="#cuenta"
+          aria-haspopup="true">
+          <span class="mn-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="3.5"></circle>
+              <path d="M5 20c.8-3.2 3.1-5 7-5s6.2 1.8 7 5"></path>
+            </svg>
+          </span>
+          <span>Cuenta</span>
+        </a>
+
+        <div class="mn-account-menu" aria-label="Opciones de cuenta">
+          <a href="#pedidos">Mis pedidos</a>
+          <a href="#cuenta">Mis pagos pendientes</a>
+          <a href="#cuenta">Envíos y direcciones</a>
+          <a href="#cuenta">Nivel</a>
+          <a href="#cuenta">Datos fiscales</a>
+          <a href="#cuenta">Favoritos</a>
+          <a href="#cuenta">Notificaciones</a>
+          <a href="#cuenta">Seguridad y sesiones</a>
+          <a href="#cuenta">Ayuda y soporte</a>
+          <span class="mn-account-menu-divider"></span>
+          <a href="#cuenta">Cerrar sesión</a>
+        </div>
+      </div>
+
+    </nav>
+  </div>
+</header>
+
 <main class="mn-content">
 <section class="mn-view" data-view-panel="catalogo">
   <header class="mn-view-head">
-    <h1>Catálogo</h1>
-    <p>Encuentra productos, marcas o categorías.</p>
-  </header>
+ </header>
+  <section class="mn-categories" id="mn-category-strip" aria-label="Categorías"></section>
 
-  <section
-    class="mn-categories"
-    id="mn-category-strip"
-    aria-label="Categorías">
-  </section>
+  <div class="mn-search-status" id="mn-search-status" aria-live="polite" hidden></div>
+  <br>
 
-  <div
-    class="mn-search-status"
-    id="mn-search-status"
-    aria-live="polite">
-  </div>
-
-  <section
-    class="mn-catalog-grid"
-    id="mn-products"
-    aria-live="polite">
-  </section>
+  <section class="mn-catalog-grid" id="mn-products" aria-live="polite"></section>
 
   <div id="mn-catalog-sentinel" aria-hidden="true"></div>
 </section>
 
-<section class="mn-view" data-view-panel="carrito"><div class="mn-view-head"><h1>Carrito</h1><p>Vista preparada para la futura lógica real del carrito.</p></div><div class="mn-empty">Tu carrito está vacío en esta maqueta.</div></section>
-<section class="mn-view" data-view-panel="pedidos"><div class="mn-view-head"><h1>Pedidos</h1><p>Aquí se mostrarán los pedidos y su estado.</p></div><div class="mn-empty">Todavía no hay pedidos de demostración.</div></section>
-<section class="mn-view" data-view-panel="cuenta"><div class="mn-view-head"><h1>Mi cuenta</h1><p>La vista de cuenta existente ahora vive dentro del App Shell.</p></div><section class="mn-profile"><div class="avatar">GC</div><div class="profile-copy"><h2>Gabriel Ceballos</h2><p>gabriel@ejemplo.com</p></div><button class="profile-action">Editar perfil</button></section><section class="account-list">
-<a class="account-row" href="#"><span class="row-icon">🛍</span><span class="row-label">Mis pedidos</span><span class="row-spacer"></span><span class="row-count">2</span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">💳</span><span class="row-label">Mis pagos pendientes</span><span class="row-spacer"></span><span class="row-count">1</span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">📦</span><span class="row-label">Envíos y direcciones</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">🏆</span><span class="row-label">Nivel</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">🧾</span><span class="row-label">Datos fiscales</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">❤️</span><span class="row-label">Favoritos</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">🔔</span><span class="row-label">Notificaciones</span><span class="row-spacer"></span><span class="row-count">3</span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">🔐</span><span class="row-label">Seguridad y sesiones</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
-<a class="account-row" href="#"><span class="row-icon">❓</span><span class="row-label">Ayuda y soporte</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
-</section><div class="mn-bottom"><button class="logout">Cerrar sesión</button></div><div class="preview-note"><strong>PREVIEW VISUAL:</strong> la información sigue siendo demostrativa. Todavía no hay conexión con API, sesiones ni datos reales.</div></section>
-</main></div>
+<section class="mn-view" data-view-panel="carrito">
+  <div class="mn-view-head">
+    <h1>Carrito</h1>
+    <p>Vista preparada para la futura lógica real del carrito.</p>
+  </div>
+  <div class="mn-empty">Tu carrito está vacío en esta maqueta.</div>
+</section>
+
+<section class="mn-view" data-view-panel="pedidos">
+  <div class="mn-view-head">
+    <h1>Pedidos</h1>
+    <p>Aquí se mostrarán los pedidos y su estado.</p>
+  </div>
+  <div class="mn-empty">Todavía no hay pedidos de demostración.</div>
+</section>
+
+<section class="mn-view" data-view-panel="cuenta">
+  <div class="mn-view-head">
+    <h1>Mi cuenta</h1>
+    <p>La vista de cuenta existente ahora vive dentro del App Shell.</p>
+  </div>
+  <section class="mn-profile">
+    <div class="avatar">GC</div>
+    <div class="profile-copy">
+      <h2>Gabriel Ceballos</h2>
+      <p>gabriel@ejemplo.com</p>
+    </div>
+    <button class="profile-action">Editar perfil</button>
+  </section>
+  <section class="account-list">
+    <a class="account-row" href="#"><span class="row-icon">🛍</span><span class="row-label">Mis pedidos</span><span class="row-spacer"></span><span class="row-count">2</span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">💳</span><span class="row-label">Mis pagos pendientes</span><span class="row-spacer"></span><span class="row-count">1</span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">📦</span><span class="row-label">Envíos y direcciones</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">🏆</span><span class="row-label">Nivel</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">🧾</span><span class="row-label">Datos fiscales</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">❤️</span><span class="row-label">Favoritos</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">🔔</span><span class="row-label">Notificaciones</span><span class="row-spacer"></span><span class="row-count">3</span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">🔐</span><span class="row-label">Seguridad y sesiones</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
+    <a class="account-row" href="#"><span class="row-icon">❓</span><span class="row-label">Ayuda y soporte</span><span class="row-spacer"></span><span class="row-arrow">›</span></a>
+  </section>
+  <div class="mn-bottom"><button class="logout">Cerrar sesión</button></div>
+  <div class="preview-note"><strong>PREVIEW VISUAL:</strong> la información sigue siendo demostrativa. Todavía no hay conexión con API, sesiones ni datos reales.</div>
+</section>
+</main>
+</div>
 <script type="module" src="./app/app.js"></script>
 </body>
 </html>
+

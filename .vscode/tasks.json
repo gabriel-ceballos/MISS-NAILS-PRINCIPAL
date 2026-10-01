@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MISS NAILS · Sincronización automática",
+      "type": "npm",
+      "script": "watch:sync",
+      "isBackground": true,
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    }
+  ]
+}
