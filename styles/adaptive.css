@@ -470,6 +470,13 @@
 }
 
 @container content (max-width:500px){
+
+    /* Cuenta móvil: contenido funcional, sin encabezado ni texto de preview. */
+  .mn-view[data-view-panel="cuenta"] .mn-view-head,
+  .mn-view[data-view-panel="cuenta"] .preview-note{
+    display:none;
+  }
+  
   .mn-view-head h1{
     font-size:25px;
   }
@@ -494,6 +501,9 @@
     font-size:15px;
   }
 }
+
+
+
 
 @media (orientation:landscape){
   .mn-content{
