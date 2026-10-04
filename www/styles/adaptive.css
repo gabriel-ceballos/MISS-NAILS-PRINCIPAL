@@ -517,7 +517,8 @@
 
 @media screen and (max-width:899px){
 
-  .mn-app[data-view="carrito"] .mn-header{
+  .mn-app[data-view="carrito"] .mn-header,
+  .mn-app[data-view="cuenta"] .mn-header{
     height:0 !important;
     min-height:0 !important;
     margin:0 !important;
@@ -526,7 +527,8 @@
     box-shadow:none !important;
   }
 
-  .mn-app[data-view="carrito"] .mn-header-inner{
+  .mn-app[data-view="carrito"] .mn-header-inner,
+  .mn-app[data-view="cuenta"] .mn-header-inner{
     height:0 !important;
     min-height:0 !important;
     margin:0 !important;
@@ -536,11 +538,15 @@
 
   .mn-app[data-view="carrito"] .mn-brand,
   .mn-app[data-view="carrito"] .mn-search,
-  .mn-app[data-view="carrito"] .mn-notification{
+  .mn-app[data-view="carrito"] .mn-notification,
+  .mn-app[data-view="cuenta"] .mn-brand,
+  .mn-app[data-view="cuenta"] .mn-search,
+  .mn-app[data-view="cuenta"] .mn-notification{
     display:none !important;
   }
 
-  .mn-app[data-view="carrito"] .mn-main-nav{
+  .mn-app[data-view="carrito"] .mn-main-nav,
+  .mn-app[data-view="cuenta"] .mn-main-nav{
     display:grid !important;
     position:fixed !important;
     left:0 !important;
@@ -556,9 +562,16 @@
     margin:0 !important;
   }
 
-  .mn-app[data-view="carrito"] .mn-content{
+  .mn-app[data-view="carrito"] .mn-content,
+  .mn-app[data-view="cuenta"] .mn-content{
     padding-top:16px;
     padding-bottom:calc(94px + var(--safe-bottom));
+  }
+
+  /* Al ocultar el header de Cuenta, el perfil no debe conservar
+     el desplazamiento vertical reservado para el header. */
+  .mn-app[data-view="cuenta"] .mn-profile{
+    top:16px;
   }
 
 }
