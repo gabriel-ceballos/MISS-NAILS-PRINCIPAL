@@ -21,66 +21,29 @@
     <h1 id="mn-login-title">Iniciar sesión</h1>
     <p class="mn-login-subtitle">Accede a tu cuenta MISS NAILS.</p>
 
-    <form id="mn-login-form" novalidate>
-      <label class="mn-login-label" for="mn-login-email">
-        Correo electrónico
-      </label>
+    <div
+      class="mn-login-message"
+      id="mn-login-message"
+      role="alert"
+      hidden
+    ></div>
 
-      <input
-        class="mn-login-input"
-        id="mn-login-email"
-        type="email"
-        autocomplete="username"
-        inputmode="email"
-        required
-      >
-
-      <label class="mn-login-label" for="mn-login-password">
-        Contraseña
-      </label>
-
-      <input
-        class="mn-login-input"
-        id="mn-login-password"
-        type="password"
-        autocomplete="current-password"
-        required
-      >
-
-      <div
-        class="mn-login-message"
-        id="mn-login-message"
-        role="alert"
-        hidden
-      ></div>
-
-      <button
-        class="mn-login-submit"
-        id="mn-login-submit"
-        type="submit"
-      >
-        Iniciar sesión
-      </button>
-    </form>
-
-    <div class="mn-login-divider">
-      <span>o</span>
+    <div class="mn-login-status" id="mn-login-status" aria-live="polite">
+      Selecciona un proveedor para continuar.
     </div>
 
     <button
       class="mn-login-provider"
+      id="mn-login-google"
       type="button"
-      disabled
-      aria-disabled="true"
     >
       Continuar con Google
     </button>
 
     <button
       class="mn-login-provider"
+      id="mn-login-microsoft"
       type="button"
-      disabled
-      aria-disabled="true"
     >
       Continuar con Microsoft
     </button>

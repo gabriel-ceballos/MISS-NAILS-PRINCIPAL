@@ -1,0 +1,38 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "miss-nails-api",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-06",
+  "workers_dev": true,
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "OAUTH_STATE_STORE",
+        "class_name": "OAuthStateStore"
+      }
+    ]
+  },
+  "exports": {
+    "OAuthStateStore": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  },
+  "secrets": {
+    "required": [
+      "GOOGLE_CLIENT_SECRET",
+      "MICROSOFT_CLIENT_SECRET",
+      "MISS_NAILS_SERVICE_KEY"
+    ]
+  },
+  "vars": {
+    "WORKER_ORIGIN": "https://miss-nails-api.ceballosgg2000.workers.dev",
+    "APP_ORIGIN": "https://gabriel-ceballos.github.io",
+    "APP_PATH": "/MISS-NAILS/",
+    "APP_ORIGINS": "https://gabriel-ceballos.github.io",
+    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzXAhVTNxhrvJNvWGumx3h3AKG47soHE_Z_PFIha2wgMZyLNknE90t0ttfm32cRKKV8TU/exec",
+    "GOOGLE_CLIENT_ID": "375980187783-shvrkd8d0nkeaem7tju07co7bponc9ev.apps.googleusercontent.com",
+    "MICROSOFT_CLIENT_ID": "0ad43298-3dcc-4622-9b75-f58c73dd695f",
+    "MICROSOFT_ALLOWED_TENANTS": "221ce760-a873-4e2c-a9b1-b7fc98b2a627"
+  }
+}
