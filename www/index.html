@@ -11,7 +11,51 @@
 <link rel="stylesheet" href="./styles/adaptive.css">
 </head>
 <body>
+
+<section class="mn-login" id="mn-login" hidden aria-labelledby="mn-login-title">
+  <div class="mn-login-card">
+    <div class="mn-login-brand">
+      <img src="./assets/logo.png" alt="MISS NAILS">
+    </div>
+
+    <h1 id="mn-login-title">Iniciar sesión</h1>
+    <p class="mn-login-subtitle">Accede a tu cuenta MISS NAILS.</p>
+
+    <div
+      class="mn-login-message"
+      id="mn-login-message"
+      role="alert"
+      hidden
+    ></div>
+
+    <div class="mn-login-status" id="mn-login-status" aria-live="polite">
+      Selecciona un proveedor para continuar.
+    </div>
+
+    <button
+      class="mn-login-provider"
+      id="mn-login-google"
+      type="button"
+    >
+      Continuar con Google
+    </button>
+
+    <button
+      class="mn-login-provider"
+      id="mn-login-microsoft"
+      type="button"
+    >
+      Continuar con Microsoft
+    </button>
+
+    <p class="mn-login-note">
+      El acceso está limitado a usuarios autorizados de MISS NAILS.
+    </p>
+  </div>
+</section>
+
 <div class="mn-app">
+
 <header class="mn-header">
   <div class="mn-header-inner">
 
@@ -60,7 +104,7 @@
         </span>
        <span>Catálogo</span>
       </a>
- 
+
       <a class="mn-nav-item" data-view="carrito" href="#carrito">
         <span class="mn-nav-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"

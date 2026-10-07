@@ -9,9 +9,171 @@
 .mn-profile{position:sticky;top:calc(78px + var(--safe-top));z-index:10;background:#fff;border:1px solid var(--borde);border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px;margin:0 0 24px;box-shadow:0 2px 8px rgba(0,0,0,.04)}.avatar{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#f7b2cd,#E65A92);color:#fff;font-size:19px;font-weight:800;flex:0 0 auto}.profile-copy{min-width:0}.profile-copy h2{margin:0 0 3px;font-size:18px}.profile-copy p{margin:0;color:var(--gris);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile-action{margin-left:auto;border:0;background:var(--rosa-claro);color:var(--rosa-oscuro);padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer;white-space:nowrap}
 .account-list{background:#fff;border-top:1px solid var(--borde);border-bottom:1px solid var(--borde)}.account-row{min-height:64px;display:flex;align-items:center;gap:14px;padding:0 4px;text-decoration:none;color:inherit;border-bottom:1px solid var(--borde)}.account-row:last-child{border-bottom:0}.account-row:hover{background:#fcfcfc}.row-icon{width:30px;flex:0 0 30px;text-align:center;font-size:22px}.row-label{font-size:16px;font-weight:600;line-height:1.2}.row-spacer{flex:1}.row-count{min-width:24px;height:24px;padding:0 7px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#E94358;color:#fff;font-size:12px;font-weight:800}.row-arrow{font-size:22px;color:#A1A1A1;margin-left:2px}
 .mn-empty{padding:34px 20px;text-align:center;color:var(--gris);border-style:dashed}.mn-search-status{min-height:20px;margin:-8px 0 14px;color:var(--gris);font-size:13px}.mn-search-status:empty{display:none}.mn-bottom{margin-top:30px;padding-top:20px;border-top:1px solid var(--borde)}.logout{border:1px solid #ead8df;background:#fff;color:#b23c6c;border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer}.preview-note{margin-top:20px;padding:11px 14px;border:1px dashed #e5c8d5;background:#fff8fb;color:#8e536b;border-radius:12px;font-size:11px;line-height:1.45}
-.mn-brand-logo{width:182px;max-height:68px}.mn-search{order:0;width:100%;min-width:0}.mn-notification{order:0}.mn-main-nav{order:0;margin-left:0}.mn-nav-item{min-height:44px;padding:9px 12px}.mn-nav-item[data-view="carrito"],.mn-nav-item[data-view="cuenta"]{display:flex}.mn-content{width:min(100%,1280px)}}
-.mn-header{position:sticky;padding-top:calc(10px + var(--safe-top));padding-bottom:10px;backdrop-filter:none;-webkit-backdrop-filter:none}.mn-header-inner{justify-content:space-between;gap:8px}.mn-brand{order:1}.mn-brand-logo{width:205px;max-height:78px}.mn-search{order:3;flex:0 0 100%;width:100%;min-width:0;height:46px}.mn-search-input{font-size:14px}.mn-search-submit{width:46px}.mn-notification{order:2;width:46px;height:46px;flex-basis:46px}.mn-main-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;padding:7px max(7px,calc(7px + var(--safe-right))) calc(7px + var(--safe-bottom)) max(7px,calc(7px + var(--safe-left)));background:rgba(255,255,255,.97);border-top:1px solid var(--borde);box-shadow:0 -4px 14px rgba(0,0,0,.06);display:grid;grid-template-columns:repeat(4,1fr);gap:2px}.mn-nav-item{min-width:0;min-height:54px;padding:6px 2px;border-radius:10px;flex-direction:column;gap:3px;font-size:10px}.mn-nav-icon{font-size:19px}.mn-content{padding-top:20px;padding-bottom:calc(94px + var(--safe-bottom))}.mn-view-head h1{font-size:25px}.mn-home-grid{grid-template-columns:1fr}.mn-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mn-profile{top:calc(113px + var(--safe-top));padding:15px;border-radius:14px;margin-bottom:20px}.avatar{width:52px;height:52px;font-size:18px}.profile-copy h2{font-size:17px}.profile-copy p{font-size:12px}.profile-action{font-size:11px;padding:8px 9px}.account-row{min-height:60px;gap:12px;padding:0 2px}.row-icon{width:28px;flex-basis:28px;font-size:20px}.row-label{font-size:15px}}
-.mn-search-input{font-size:13px}.mn-search-submit{width:44px}.mn-nav-item{font-size:9px}.mn-nav-icon{font-size:18px}.mn-profile{gap:10px;padding:13px}.avatar{width:46px;height:46px;font-size:16px}.profile-copy h2{font-size:16px}.profile-action{padding:7px 8px;font-size:10px}.account-row{min-height:56px;gap:10px}.row-label{font-size:14px}}
-.mn-header-inner,.mn-content{width:min(100%,920px)}.mn-brand-logo{width:170px;max-height:64px}.mn-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.mn-nav-item{min-height:48px}}
+.mn-brand-logo{width:182px;max-height:68px}.mn-search{order:0;width:100%;min-width:0}.mn-notification{order:0}.mn-main-nav{order:0;margin-left:0}.mn-nav-item{min-height:44px;padding:9px 12px}.mn-nav-item[data-view="carrito"],.mn-nav-item[data-view="cuenta"]{display:flex}
+.mn-header{position:sticky;padding-top:calc(10px + var(--safe-top));padding-bottom:10px;backdrop-filter:none;-webkit-backdrop-filter:none}.mn-header-inner{justify-content:space-between;gap:8px}.mn-brand{order:1}.mn-brand-logo{width:205px;max-height:78px}.mn-search{order:3;flex:0 0 100%;width:100%;min-width:0;height:46px}.mn-search-input{font-size:14px}.mn-search-submit{width:46px}.mn-notification{order:2;width:46px;height:46px;flex-basis:46px}.mn-main-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;padding:7px max(7px,calc(7px + var(--safe-right))) calc(7px + var(--safe-bottom)) max(7px,calc(7px + var(--safe-left)));background:rgba(255,255,255,.97);border-top:1px solid var(--borde);box-shadow:0 -4px 14px rgba(0,0,0,.06);display:grid;grid-template-columns:repeat(4,1fr);gap:2px}.mn-nav-item{min-width:0;min-height:54px;padding:6px 2px;border-radius:10px;flex-direction:column;gap:3px;font-size:10px}.mn-nav-icon{font-size:19px}.mn-content{padding-top:20px;padding-bottom:calc(94px + var(--safe-bottom))}.mn-view-head h1{font-size:25px}.mn-home-grid{grid-template-columns:1fr}.mn-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mn-profile{top:calc(113px + var(--safe-top));padding:15px;border-radius:14px;margin-bottom:20px}.avatar{width:52px;height:52px;font-size:18px}.profile-copy h2{font-size:17px}.profile-copy p{font-size:12px}.profile-action{font-size:11px;padding:8px 9px}.account-row{min-height:60px;gap:12px;padding:0 2px}.row-icon{width:28px;flex-basis:28px;font-size:20px}.row-label{font-size:15px}
+.mn-search-input{font-size:13px}.mn-search-submit{width:44px}.mn-nav-item{font-size:9px}.mn-nav-icon{font-size:18px}.mn-profile{gap:10px;padding:13px}.avatar{width:46px;height:46px;font-size:16px}.profile-copy h2{font-size:16px}.profile-action{padding:7px 8px;font-size:10px}.account-row{min-height:56px;gap:10px}.row-label{font-size:14px}
+.mn-header-inner,.mn-content{width:min(100%,920px)}.mn-brand-logo{width:170px;max-height:64px}.mn-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mn-nav-item{min-height:48px}
 .mn-brand:focus-visible,.mn-nav-item:focus-visible,.mn-notification:focus-visible,.mn-search-submit:focus-visible{outline:3px solid rgba(230,90,146,.3);outline-offset:2px}
+/* =========================================================
+   MISS NAILS — LOGIN V2
+   Pantalla de acceso
+   ========================================================= */
+
+.mn-login{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:var(--fondo);
+}
+
+.mn-login-card{
+  width:min(100%,420px);
+  padding:30px;
+  background:#fff;
+  border:1px solid var(--borde);
+  border-radius:20px;
+  box-shadow:var(--sombra);
+}
+
+.mn-login-brand{
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.mn-login-brand img{
+  width:min(210px,70%);
+  max-height:76px;
+  object-fit:contain;
+}
+
+.mn-login-card h1{
+  margin:0 0 7px;
+  text-align:center;
+  font-size:28px;
+}
+
+.mn-login-subtitle{
+  margin:0 0 24px;
+  text-align:center;
+  color:var(--gris);
+  font-size:14px;
+}
+
+.mn-login-label{
+  display:block;
+  margin:0 0 7px;
+  font-size:13px;
+  font-weight:700;
+}
+
+.mn-login-input{
+  width:100%;
+  height:46px;
+  margin:0 0 15px;
+  padding:0 13px;
+  border:1px solid #d9d3d7;
+  border-radius:10px;
+  background:#fff;
+  color:var(--texto);
+  outline:0;
+}
+
+.mn-login-input:focus{
+  border-color:var(--rosa-vivo);
+  box-shadow:0 0 0 3px rgba(230,90,146,.14);
+}
+
+.mn-login-submit{
+  width:100%;
+  height:46px;
+  border:0;
+  border-radius:10px;
+  background:var(--rosa);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.mn-login-submit:disabled{
+  opacity:.65;
+  cursor:wait;
+}
+
+.mn-login-message{
+  margin:-3px 0 12px;
+  padding:10px 12px;
+  border:1px solid #f0c8d7;
+  background:#fff5f8;
+  color:#a23563;
+  border-radius:10px;
+  font-size:13px;
+  line-height:1.35;
+}
+
+.mn-login-divider{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:22px 0 14px;
+  color:#999;
+  font-size:12px;
+}
+
+.mn-login-divider::before,
+.mn-login-divider::after{
+  content:"";
+  height:1px;
+  background:var(--borde);
+  flex:1;
+}
+
+.mn-login-provider{
+  width:100%;
+  height:44px;
+  margin-top:9px;
+  border:1px solid var(--borde);
+  border-radius:10px;
+  background:#fff;
+  color:#777;
+  font-weight:700;
+}
+
+.mn-login-provider:disabled{
+  cursor:not-allowed;
+  opacity:.55;
+}
+
+.mn-login-note{
+  margin:20px 0 0;
+  text-align:center;
+  color:#8a858a;
+  font-size:11px;
+  line-height:1.45;
+}
+
+.mn-login-submit:focus-visible,
+.mn-login-provider:focus-visible{
+  outline:3px solid rgba(230,90,146,.25);
+  outline-offset:2px;
+}
+
+
+/* =========================================================
+   MISS NAILS — AISLAMIENTO DE LOGIN
+   Oculta completamente la aplicación mientras no hay sesión
+   ========================================================= */
+
+body.mn-auth-required .mn-app{
+  display:none !important;
+}
+
+body.mn-auth-required{
+  overflow:hidden;
+}
+
+
+.mn-login[hidden]{
+  display:none !important;
+}
