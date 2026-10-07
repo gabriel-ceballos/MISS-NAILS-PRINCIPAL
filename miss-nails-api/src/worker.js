@@ -704,14 +704,33 @@ async function callAppsScript(env, action, data) {
 }
 
 async function loginFederated(env, identity, request) {
-  const platform = request.headers.get('Sec-CH-UA-Platform') || 'web';
-  const device = request.headers.get('User-Agent') || '';
+  const platform =
+    request.headers.get('Sec-CH-UA-Platform') || 'web';
 
-  const result = await callAppsScript(env, 'auth_v2_login_federado', {
-    ...identity,
-    plataforma: text(platform).slice(0, 100),
-    dispositivo: text(device).slice(0, 200),
-  });
+  const device =
+    request.headers.get('User-Agent') || '';
+
+  const result = await callAppsScript(
+    env,
+    'auth_v2_login_federado',
+    {
+      ...identity,
+      plataforma: text(platform).slice(0, 100),
+      dispositivo: text(device).slice(0, 200),
+    }
+  );
+
+  console.log('AUTH_DIAGNOSTICO', JSON.stringify({
+    etapa: 'auth_v2_login_federado',
+    status: result.status,
+    ok: result.json?.ok === true,
+    autenticado: result.json?.autenticado === true,
+    motivo: text(result.json?.motivo),
+    tieneSesion: !!result.json?.sesion,
+    tieneSessionSecret:
+      !!text(result.json?.sesion?.sessionSecret),
+    proveedor: text(identity?.proveedor),
+  }));
 
   if (
     result.status < 200 ||
@@ -719,14 +738,35 @@ async function loginFederated(env, identity, request) {
     result.json.ok !== true ||
     result.json.autenticado !== true
   ) {
-    const reason = result.json.motivo || 'AUTENTICACION_RECHAZADA';
+    const reason =
+      result.json.motivo ||
+      'AUTENTICACION_RECHAZADA';
+
     throw new Error(reason);
   }
 
-  const sessionSecret = text(result.json?.sesion?.sessionSecret);
+  const sessionSecret =
+    text(result.json?.sesion?.sessionSecret);
+
   if (!sessionSecret) {
+    console.log(
+      'AUTH_DIAGNOSTICO',
+      JSON.stringify({
+        etapa: 'session_secret',
+        resultado: 'AUSENTE',
+      })
+    );
+
     throw new Error('SESSION_SECRET_AUSENTE');
   }
+
+  console.log(
+    'AUTH_DIAGNOSTICO',
+    JSON.stringify({
+      etapa: 'session_secret',
+      resultado: 'OK',
+    })
+  );
 
   return result.json;
 }
@@ -739,11 +779,21 @@ function mapAuthError(error) {
     'IDENTIDAD_DESACTIVADA',
     'CLIENTE_NO_ENCONTRADO',
     'CLIENTE_DESACTIVADO',
+    'ERROR_AUTH_V2',
+    'SERVICE_KEY_INVALIDA',
+    'SESSION_SECRET_AUSENTE',
+    'AUTENTICACION_RECHAZADA',
   ]);
 
   if (direct.has(code)) return code;
 
   if (code === 'AUTENTICACION_CANCELADA') return code;
+
+  // Durante diagnóstico: conservar el código técnico
+  // para identificar exactamente dónde está fallando.
+  if (code) {
+    return code.slice(0, 80);
+  }
 
   return 'ERROR_AUTENTICACION';
 }
