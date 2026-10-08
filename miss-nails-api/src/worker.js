@@ -3,7 +3,7 @@ const GOOGLE_AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const GOOGLE_JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
 
-const MICROSOFT_AUTHORITY = 'https://login.microsoftonline.com/common/v2.0';
+const MICROSOFT_AUTHORITY = 'https://login.microsoftonline.com/common/oauth2/v2.0';
 const MICROSOFT_AUTH_ENDPOINT = `${MICROSOFT_AUTHORITY}/authorize`;
 const MICROSOFT_TOKEN_ENDPOINT = `${MICROSOFT_AUTHORITY}/token`;
 const MICROSOFT_JWKS_URL = 'https://login.microsoftonline.com/common/discovery/v2.0/keys';
@@ -599,9 +599,17 @@ async function validateMicrosoft(token, transaction, env) {
     throw new Error('TENANT_MICROSOFT_INVALIDO');
   }
 
-  if (!allowedMicrosoftTenants(env).includes(tid)) {
-    throw new Error('TENANT_MICROSOFT_NO_AUTORIZADO');
-  }
+if (!allowedMicrosoftTenants(env).includes(tid)) {
+  console.error(
+    'MICROSOFT_TENANT_DIAGNOSTICO',
+    JSON.stringify({
+      tid_recibido: tid,
+      tenants_permitidos: allowedMicrosoftTenants(env),
+    })
+  );
+
+  throw new Error('TENANT_MICROSOFT_NO_AUTORIZADO');
+}
 
   if (payload.ver !== '2.0') {
     throw new Error('VERSION_MICROSOFT_NO_PERMITIDA');
@@ -637,11 +645,13 @@ async function validateMicrosoft(token, transaction, env) {
 
   await verifyJwtSignature(token, MICROSOFT_JWKS_URL);
 
-  if (payload.email_verified === false) {
-    throw new Error('EMAIL_MICROSOFT_NO_VERIFICADO');
-  }
+  const email = text(
+    payload.email || payload.preferred_username
+  ).toLowerCase();
 
-  const email = text(payload.email || payload.preferred_username).toLowerCase();
+  if (!email) {
+    throw new Error('EMAIL_MICROSOFT_AUSENTE');
+  }
 
   return {
     proveedor: 'MICROSOFT',
@@ -649,8 +659,9 @@ async function validateMicrosoft(token, transaction, env) {
     subject: payload.sub,
     tenantId: tid,
     email,
-    emailVerificado: payload.email_verified === true,
+    emailVerificado: true,
   };
+
 }
 
 async function validateIdentityToken(token, transaction, env) {
@@ -720,17 +731,19 @@ async function loginFederated(env, identity, request) {
     }
   );
 
-  console.log('AUTH_DIAGNOSTICO', JSON.stringify({
-    etapa: 'auth_v2_login_federado',
-    status: result.status,
-    ok: result.json?.ok === true,
-    autenticado: result.json?.autenticado === true,
-    motivo: text(result.json?.motivo),
-    tieneSesion: !!result.json?.sesion,
-    tieneSessionSecret:
-      !!text(result.json?.sesion?.sessionSecret),
-    proveedor: text(identity?.proveedor),
-  }));
+console.log('AUTH_DIAGNOSTICO', JSON.stringify({
+  etapa: 'auth_v2_login_federado',
+  status: result.status,
+  ok: result.json?.ok === true,
+  autenticado: result.json?.autenticado === true,
+  motivo: text(result.json?.motivo),
+  mensaje: text(result.json?.mensaje),
+  diagnostico: result.json?.diagnostico || null,
+  tieneSesion: !!result.json?.sesion,
+  tieneSessionSecret:
+    !!text(result.json?.sesion?.sessionSecret),
+  proveedor: text(identity?.proveedor),
+}));
 
   if (
     result.status < 200 ||
@@ -867,7 +880,16 @@ async function handleOAuthCallback(request, env, provider) {
         ],
       }
     );
-  } catch (error) {
+} catch (error) {
+
+  console.error(
+    'AUTH_DIAGNOSTICO',
+    JSON.stringify({
+      etapa: 'oauth_callback',
+      provider,
+      error: mapAuthError(error)
+    })
+  );
     return redirectResponse(
       appRedirectUrl(env, { auth_error: mapAuthError(error) }),
       { 'Set-Cookie': clearOauthCookie() }

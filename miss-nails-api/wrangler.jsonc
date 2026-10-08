@@ -30,9 +30,10 @@
     "APP_ORIGIN": "https://gabriel-ceballos.github.io",
     "APP_PATH": "/MISS-NAILS-PRINCIPAL/",
     "APP_ORIGINS": "https://gabriel-ceballos.github.io",
-    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzXAhVTNxhrvJNvWGumx3hAKG47soHE_Z_PFIha2wgMZyLNknE90t0ttfm32cRKKV8TU/exec",
+    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzXAhVTNxhrvJNvWGumx3hAKG47soHEZ_PFIha2wgMZyLNknE90t0ttfm32cRKKV8TU/exec",
     "GOOGLE_CLIENT_ID": "375980187783-shvrkd8d0nkeaem7tju07co7bponc9ev.apps.googleusercontent.com",
     "MICROSOFT_CLIENT_ID": "0ad43298-3dcc-4622-9b75-f58c73dd695f",
-    "MICROSOFT_ALLOWED_TENANTS": "221ce760-a873-4e2c-a9b1-b7fc98b2a627"
+    "MICROSOFT_ALLOWED_TENANTS": "221ce760-a873-4e2c-a9b1-b7fc98b2a627,9188040d-6c67-4c5b-b112-36a304b66dad"
   }
 }
+
