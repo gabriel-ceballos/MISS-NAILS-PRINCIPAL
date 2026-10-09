@@ -256,6 +256,17 @@ function appRedirectUrl(env, params = {}) {
   return url.toString();
 }
 
+function oauthReturnUrl(env, transaction, params = {}) {
+  if (transaction?.platform === 'android') {
+    const url = new URL('missnails://auth/callback');
+    for (const [key, value] of Object.entries(params)) {
+      if (value != null) url.searchParams.set(key, value);
+    }
+    return url.toString();
+  }
+  return appRedirectUrl(env, params);
+}
+
 function requireConfig(env, names) {
   for (const name of names) {
     if (!text(env[name])) {
@@ -359,6 +370,8 @@ async function startOAuth(request, env, provider) {
 
   requireConfig(env, required);
 
+  const requestUrl = new URL(request.url);
+  const platform = requestUrl.searchParams.get('platform') === 'android' ? 'android' : 'web';
   const nonce = randomToken(32);
   const codeVerifier = randomToken(48);
   const codeChallenge = await sha256Base64Url(codeVerifier);
@@ -367,6 +380,7 @@ async function startOAuth(request, env, provider) {
     nonce,
     codeVerifier,
     provider,
+    platform,
     redirectUri: callbackUrl(env, provider),
     createdAt: Date.now(),
   });
@@ -834,7 +848,7 @@ async function handleOAuthCallback(request, env, provider) {
 
   if (transaction.provider !== provider) {
     return redirectResponse(
-      appRedirectUrl(env, { auth_error: 'TRANSACCION_INVALIDA' }),
+      oauthReturnUrl(env, transaction, { auth_error: 'TRANSACCION_INVALIDA' }),
       { 'Set-Cookie': clearOauthCookie() }
     );
   }
@@ -847,7 +861,7 @@ async function handleOAuthCallback(request, env, provider) {
       : 'ERROR_AUTENTICACION';
 
     return redirectResponse(
-      appRedirectUrl(env, { auth_error: errorCode }),
+      oauthReturnUrl(env, transaction, { auth_error: errorCode }),
       { 'Set-Cookie': clearOauthCookie() }
     );
   }
@@ -856,7 +870,7 @@ async function handleOAuthCallback(request, env, provider) {
 
   if (!code) {
     return redirectResponse(
-      appRedirectUrl(env, { auth_error: 'ERROR_AUTENTICACION' }),
+      oauthReturnUrl(env, transaction, { auth_error: 'ERROR_AUTENTICACION' }),
       { 'Set-Cookie': clearOauthCookie() }
     );
   }
@@ -870,6 +884,22 @@ async function handleOAuthCallback(request, env, provider) {
     );
     const result = await loginFederated(env, identity, request);
     const sessionSecret = result.sesion.sessionSecret;
+
+    if (transaction.platform === 'android') {
+      // La cookie del navegador externo no está disponible en el WebView.
+      // Se entrega un ticket aleatorio, efímero y de un solo uso para que
+      // el WebView reciba la cookie HttpOnly sin exponer el secreto.
+      const ticket = await saveOAuthTransaction(env, {
+        type: 'native_handoff',
+        sessionSecret,
+        platform: 'android',
+        createdAt: Date.now(),
+      });
+      return redirectResponse(
+        oauthReturnUrl(env, transaction, {ticket}),
+        {'Set-Cookie': clearOauthCookie()}
+      );
+    }
 
     return redirectResponse(
       appRedirectUrl(env, { auth: 'ok' }),
@@ -891,10 +921,40 @@ async function handleOAuthCallback(request, env, provider) {
     })
   );
     return redirectResponse(
-      appRedirectUrl(env, { auth_error: mapAuthError(error) }),
+      oauthReturnUrl(env, transaction, { auth_error: mapAuthError(error) }),
       { 'Set-Cookie': clearOauthCookie() }
     );
   }
+}
+
+async function handleNativeHandoffExchange(request, env) {
+  if (request.method !== 'POST' || !validateOrigin(request, env)) {
+    return jsonResponse(request, env, {ok: false, error: 'ORIGEN_NO_AUTORIZADO'}, 403);
+  }
+
+  const contentType = request.headers.get('Content-Type') || '';
+  if (!contentType.toLowerCase().includes('application/json')) {
+    return jsonResponse(request, env, {ok: false, error: 'CONTENT_TYPE_INVALIDO'}, 415);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const ticket = text(body.ticket);
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(ticket)) {
+    return jsonResponse(request, env, {ok: false, error: 'TICKET_INVALIDO'}, 400);
+  }
+
+  const handoff = await consumeOAuthTransaction(env, ticket);
+  if (!handoff || handoff.type !== 'native_handoff' || handoff.platform !== 'android' || !text(handoff.sessionSecret)) {
+    return jsonResponse(request, env, {ok: false, error: 'TICKET_EXPIRADO'}, 401);
+  }
+
+  return jsonResponse(
+    request,
+    env,
+    {ok: true},
+    200,
+    {'Set-Cookie': sessionCookie(handoff.sessionSecret)}
+  );
 }
 
 async function resolveSession(request, env) {
@@ -1269,6 +1329,10 @@ export default {
 
       if (url.pathname === '/auth/microsoft/callback' && request.method === 'GET') {
         return await handleOAuthCallback(request, env, 'microsoft');
+      }
+
+      if (url.pathname === '/auth/native/exchange' && request.method === 'POST') {
+        return await handleNativeHandoffExchange(request, env);
       }
 
       if (url.pathname === '/api/session' && request.method === 'GET') {

@@ -59,7 +59,7 @@ export function initLogin({onAuthenticated}) {
     boton.focus();
 
     try {
-      iniciarSesionFederada(proveedor);
+      await iniciarSesionFederada(proveedor);
     } catch (error) {
       mostrarMensaje(error.message || 'No fue posible iniciar el acceso.');
       bloquear(false);
