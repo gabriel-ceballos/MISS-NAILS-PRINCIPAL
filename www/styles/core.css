@@ -172,7 +172,7 @@ body.mn-auth-required{overflow:hidden}
 
 .mn-auth-splash[hidden]{display:none !important}
 .mn-auth-splash{position:fixed;z-index:10001;inset:0;display:grid;place-items:center;padding:24px;background:#fff;opacity:1;visibility:visible}
-.mn-auth-splash img{display:block;width:min(74vw,300px);height:auto;max-height:64vh;object-fit:contain;animation:mn-auth-logo-in .24s ease-out both}
+.mn-auth-splash img{display:block;width:min(55.5vw,225px);height:auto;max-height:48vh;object-fit:contain;animation:mn-auth-logo-in .24s ease-out both}
 @keyframes mn-auth-logo-in{from{opacity:.35;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 
 body.mn-auth-checking{min-height:100dvh;overflow:hidden;background:#f7f7f9}
