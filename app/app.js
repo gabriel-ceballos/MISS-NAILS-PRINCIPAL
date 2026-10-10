@@ -13,6 +13,8 @@ import {initLogin} from './auth/login.js';
 
 const app = document.querySelector('.mn-app');
 const loginScreen = document.querySelector('#mn-login');
+const authRetry = document.querySelector('#mn-auth-retry');
+const authRetryButton = document.querySelector('#mn-auth-retry-button');
 
 if (!app || !loginScreen) {
   throw new Error('MISS NAILS: estructura principal incompleta.');
@@ -86,8 +88,11 @@ let catalogoInicializado = false;
 
 function mostrarAplicacion(estadoSesion = null) {
   login.hide();
+  if (authRetry) authRetry.hidden = true;
   app.hidden = false;
-  document.body.classList.remove('mn-auth-required');
+  app.inert = false;
+  app.removeAttribute('aria-hidden');
+  document.body.classList.remove('mn-auth-required', 'mn-auth-checking', 'mn-auth-starting');
 
   location.hash = '#catalogo';
   router.renderView();
@@ -102,9 +107,23 @@ function mostrarAplicacion(estadoSesion = null) {
 
 
 function mostrarLogin() {
+  if (authRetry) authRetry.hidden = true;
+  app.inert = true;
+  app.setAttribute('aria-hidden', 'true');
   app.hidden = true;
+  document.body.classList.remove('mn-auth-checking', 'mn-auth-starting');
   document.body.classList.add('mn-auth-required');
   login.show();
+}
+
+function mostrarErrorComunicacion() {
+  app.hidden = false;
+  app.inert = true;
+  app.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('mn-auth-required', 'mn-auth-starting');
+  document.body.classList.add('mn-auth-checking');
+  login.hide();
+  if (authRetry) authRetry.hidden = false;
 }
 
 
@@ -217,11 +236,27 @@ async function iniciarAplicacion() {
 
   if (estado.autenticada) {
     mostrarAplicacion(estado);
+  } else if (estado.errorComunicacion) {
+    mostrarErrorComunicacion();
   } else {
     mostrarLogin();
   }
 
 }
+
+async function reintentarAutenticacion() {
+  if (authRetry) authRetry.hidden = true;
+  document.body.classList.add('mn-auth-checking');
+  document.body.classList.remove('mn-auth-required', 'mn-auth-starting');
+  app.hidden = false;
+  app.inert = true;
+  app.setAttribute('aria-hidden', 'true');
+  await iniciarAplicacion();
+}
+
+authRetryButton?.addEventListener('click', () => {
+  void reintentarAutenticacion();
+});
 
 void iniciarAplicacion();
 

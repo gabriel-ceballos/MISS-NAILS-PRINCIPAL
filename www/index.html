@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="./styles/core.css">
 <link rel="stylesheet" href="./styles/adaptive.css">
 </head>
-<body class="mn-auth-required">
+<body class="mn-auth-starting">
 
 <section class="mn-login" id="mn-login" aria-labelledby="mn-login-title">
   <div class="mn-login-card">
@@ -54,7 +54,15 @@
   </div>
 </section>
 
-<div class="mn-app">
+<section class="mn-auth-retry" id="mn-auth-retry" hidden role="alertdialog" aria-labelledby="mn-auth-retry-title" aria-describedby="mn-auth-retry-copy">
+  <div class="mn-auth-retry-card">
+    <h2 id="mn-auth-retry-title">No pudimos comprobar tu sesión</h2>
+    <p id="mn-auth-retry-copy">Tu catálogo permanece protegido. Revisa tu conexión e inténtalo nuevamente.</p>
+    <button id="mn-auth-retry-button" type="button">Reintentar</button>
+  </div>
+</section>
+
+<div class="mn-app" id="mn-app-shell" inert aria-hidden="true">
 
 <header class="mn-header">
   <div class="mn-header-inner">

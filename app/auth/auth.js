@@ -85,28 +85,27 @@ export async function resolverSesion() {
       json = null;
     }
 
-    if (
-      !respuesta.ok ||
-      !json ||
-      json.ok === false ||
-      json.valida !== true
-    ) {
-      return {
-        autenticada: false,
-        cliente: null
-      };
+    // Una indisponibilidad del servidor no equivale a una sesión inválida.
+    if (respuesta.status >= 500) {
+      return { autenticada: false, errorComunicacion: true, cliente: null };
+    }
+
+    if (!respuesta.ok || !json || json.ok === false || json.valida !== true) {
+      return { autenticada: false, errorComunicacion: false, cliente: null };
     }
 
     return {
       autenticada: true,
       cliente: json.cliente || null,
       identidad: json.identidad || null,
-      sesion: json.sesion || null
+      sesion: json.sesion || null,
+      errorComunicacion: false
     };
 
   } catch {
     return {
       autenticada: false,
+      errorComunicacion: true,
       cliente: null
     };
   }

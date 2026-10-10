@@ -1198,21 +1198,23 @@ async function resolverSesion() {
     } catch {
       json = null;
     }
+    if (respuesta.status >= 500) {
+      return { autenticada: false, errorComunicacion: true, cliente: null };
+    }
     if (!respuesta.ok || !json || json.ok === false || json.valida !== true) {
-      return {
-        autenticada: false,
-        cliente: null
-      };
+      return { autenticada: false, errorComunicacion: false, cliente: null };
     }
     return {
       autenticada: true,
       cliente: json.cliente || null,
       identidad: json.identidad || null,
-      sesion: json.sesion || null
+      sesion: json.sesion || null,
+      errorComunicacion: false
     };
   } catch {
     return {
       autenticada: false,
+      errorComunicacion: true,
       cliente: null
     };
   }
@@ -1382,6 +1384,8 @@ function initLogin({ onAuthenticated }) {
 // app/app.js
 var app = document.querySelector(".mn-app");
 var loginScreen = document.querySelector("#mn-login");
+var authRetry = document.querySelector("#mn-auth-retry");
+var authRetryButton = document.querySelector("#mn-auth-retry-button");
 if (!app || !loginScreen) {
   throw new Error("MISS NAILS: estructura principal incompleta.");
 }
@@ -1421,8 +1425,11 @@ var login = initLogin({
 var catalogoInicializado = false;
 function mostrarAplicacion(estadoSesion = null) {
   login.hide();
+  if (authRetry) authRetry.hidden = true;
   app.hidden = false;
-  document.body.classList.remove("mn-auth-required");
+  app.inert = false;
+  app.removeAttribute("aria-hidden");
+  document.body.classList.remove("mn-auth-required", "mn-auth-checking", "mn-auth-starting");
   location.hash = "#catalogo";
   router.renderView();
   if (!catalogoInicializado) {
@@ -1432,9 +1439,22 @@ function mostrarAplicacion(estadoSesion = null) {
   void actualizarCuenta(estadoSesion);
 }
 function mostrarLogin() {
+  if (authRetry) authRetry.hidden = true;
+  app.inert = true;
+  app.setAttribute("aria-hidden", "true");
   app.hidden = true;
+  document.body.classList.remove("mn-auth-checking", "mn-auth-starting");
   document.body.classList.add("mn-auth-required");
   login.show();
+}
+function mostrarErrorComunicacion() {
+  app.hidden = false;
+  app.inert = true;
+  app.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("mn-auth-required", "mn-auth-starting");
+  document.body.classList.add("mn-auth-checking");
+  login.hide();
+  if (authRetry) authRetry.hidden = false;
 }
 async function actualizarCuenta(estadoSesion = null) {
   const estado = estadoSesion || await resolverSesion();
@@ -1499,10 +1519,24 @@ async function iniciarAplicacion() {
   }
   if (estado.autenticada) {
     mostrarAplicacion(estado);
+  } else if (estado.errorComunicacion) {
+    mostrarErrorComunicacion();
   } else {
     mostrarLogin();
   }
 }
+async function reintentarAutenticacion() {
+  if (authRetry) authRetry.hidden = true;
+  document.body.classList.add("mn-auth-checking");
+  document.body.classList.remove("mn-auth-required", "mn-auth-starting");
+  app.hidden = false;
+  app.inert = true;
+  app.setAttribute("aria-hidden", "true");
+  await iniciarAplicacion();
+}
+authRetryButton?.addEventListener("click", () => {
+  void reintentarAutenticacion();
+});
 void iniciarAplicacion();
 var frame = 0;
 function refreshContext() {

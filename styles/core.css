@@ -161,19 +161,69 @@
 
 
 /* =========================================================
-   MISS NAILS — AISLAMIENTO DE LOGIN
-   Oculta completamente la aplicación mientras no hay sesión
+   MISS NAILS — ESTADOS DE AUTENTICACIÓN
+   Skeleton visual del catálogo mientras se comprueba la sesión.
    ========================================================= */
-
-body.mn-auth-required .mn-app{
-  display:none !important;
+/* Arranque: no revelar ni catálogo ni login hasta resolver la sesión. */
+body.mn-auth-starting .mn-app,
+body.mn-auth-starting .mn-login,
+body.mn-auth-starting .mn-auth-retry{display:none !important}
+body.mn-auth-starting{min-height:100dvh;overflow:hidden;background:#f7f7f9}
+body.mn-auth-required .mn-app{display:none !important}
+body.mn-auth-required{overflow:hidden}
+body.mn-auth-checking{min-height:100dvh;overflow:hidden;background:#f7f7f9}
+body.mn-auth-checking .mn-login{display:none !important}
+body.mn-auth-checking .mn-view[data-view-panel="catalogo"]{display:block !important}
+body.mn-auth-checking .mn-app{
+  display:flex !important;filter:blur(5px);opacity:.76;transform:scale(.997);
+  transform-origin:center top;pointer-events:none !important;user-select:none;
+  -webkit-user-select:none;transition:filter .22s ease,opacity .22s ease;
+}
+/* Tarjetas de catálogo de reserva: solo son siluetas, nunca datos reales. */
+body.mn-auth-checking .mn-catalog-grid:empty{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  min-height:420px;
+}
+body.mn-auth-checking .mn-catalog-grid:empty::before{
+  content:"";
+  display:block;
+  grid-column:1/-1;
+  min-height:420px;
+  border-radius:16px;
+  background-color:transparent;
+  background-image:
+    linear-gradient(#e9e6e9,#e9e6e9),
+    linear-gradient(#e9e6e9,#e9e6e9),
+    linear-gradient(#e9e6e9,#e9e6e9),
+    linear-gradient(#e9e6e9,#e9e6e9),
+    linear-gradient(#fff,#fff);
+  background-size:calc(25% - 12px) 190px,calc(25% - 12px) 190px,calc(25% - 12px) 190px,calc(25% - 12px) 190px,100% 100%;
+  background-position:0 0,33.333% 0,66.666% 0,100% 0,0 0;
+  background-repeat:no-repeat;
+  border:1px solid #eee8ec;
+}
+@media(max-width:760px){
+  body.mn-auth-checking .mn-catalog-grid:empty{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  body.mn-auth-checking .mn-catalog-grid:empty::before{
+    background-size:calc(50% - 6px) 165px,calc(50% - 6px) 165px,100% 100%;
+    background-position:0 0,100% 0,0 0;
+  }
 }
 
-body.mn-auth-required{
-  overflow:hidden;
+body.mn-auth-checking .mn-app::after{
+  content:"";position:fixed;z-index:9999;inset:0;pointer-events:none;
+  background:linear-gradient(110deg,rgba(247,247,249,.12) 0%,rgba(255,255,255,.62) 38%,rgba(255,255,255,.18) 48%,rgba(230,90,146,.09) 52%,rgba(247,247,249,.12) 64%);
+  background-size:240% 100%;animation:mn-auth-skeleton-sweep 1.65s ease-in-out infinite;
 }
-
-
-.mn-login[hidden]{
-  display:none !important;
-}
+@keyframes mn-auth-skeleton-sweep{0%{background-position:100% 0}100%{background-position:-140% 0}}
+.mn-auth-retry[hidden]{display:none !important}
+.mn-auth-retry{position:fixed;z-index:10000;inset:0;display:grid;place-items:center;padding:22px;background:rgba(247,247,249,.26)}
+.mn-auth-retry-card{width:min(100%,390px);padding:24px;border:1px solid var(--borde);border-radius:18px;background:rgba(255,255,255,.96);box-shadow:0 14px 42px rgba(42,31,37,.14);text-align:center}
+.mn-auth-retry-card h2{margin:0 0 9px;font-size:19px}
+.mn-auth-retry-card p{margin:0 0 18px;color:var(--gris);font-size:14px;line-height:1.5}
+.mn-auth-retry-card button{min-height:44px;padding:10px 18px;border:0;border-radius:11px;background:var(--rosa);color:#fff;font-weight:700;cursor:pointer}
+.mn-auth-retry-card button:focus-visible{outline:3px solid rgba(230,90,146,.3);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){body.mn-auth-checking .mn-app::after{animation:none;background-position:50% 0}}
+.mn-login[hidden]{display:none !important}
