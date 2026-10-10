@@ -1,0 +1,150 @@
+﻿diff --git a/miss-nails-api/src/worker.js b/miss-nails-api/src/worker.js
+index ec4d774..2f41650 100644
+--- a/miss-nails-api/src/worker.js
++++ b/miss-nails-api/src/worker.js
+@@ -34,6 +34,64 @@ function text(value) {
+   return String(value ?? '').trim();
+ }
+ 
++
++function clientMetadata(request, platform) {
++  const ua = text(request.headers.get('User-Agent')).slice(0, 500);
++  const platformHint = text(request.headers.get('Sec-CH-UA-Platform'))
++    .replace(/^"|"$/g, '')
++    .slice(0, 80);
++  const brands = text(request.headers.get('Sec-CH-UA')).slice(0, 300);
++
++  let os = platformHint;
++  if (!os) {
++    if (/Android/i.test(ua)) os = 'Android';
++    else if (/iPhone|iPad|iPod|iOS/i.test(ua)) os = 'iOS';
++    else if (/Windows/i.test(ua)) os = 'Windows';
++    else if (/Mac OS X|Macintosh/i.test(ua)) os = 'macOS';
++    else if (/CrOS/i.test(ua)) os = 'ChromeOS';
++    else if (/Linux/i.test(ua)) os = 'Linux';
++    else os = 'No identificado';
++  }
++
++  let browser = '';
++  if (brands) {
++    try {
++      const parsed = JSON.parse(brands);
++      if (Array.isArray(parsed)) {
++        browser = parsed.map(item => text(item?.brand))
++          .filter(Boolean)
++          .filter(name => !/Not\s*A\s*Brand/i.test(name))
++          .join(', ');
++      }
++    } catch {}
++  }
++  if (!browser) {
++    if (/Edg\//i.test(ua)) browser = 'Microsoft Edge';
++    else if (/OPR\//i.test(ua)) browser = 'Opera';
++    else if (/CriOS\//i.test(ua)) browser = 'Chrome iOS';
++    else if (/FxiOS\//i.test(ua)) browser = 'Firefox iOS';
++    else if (/Firefox\//i.test(ua)) browser = 'Firefox';
++    else if (/Chrome\//i.test(ua)) browser = 'Chrome/Chromium';
++    else if (/Safari\//i.test(ua)) browser = 'Safari';
++    else browser = 'No identificado';
++  }
++
++  let deviceType = 'Escritorio';
++  if (/iPad|Tablet/i.test(ua)) deviceType = 'Tableta';
++  else if (/Mobile|Android|iPhone|iPod/i.test(ua)) deviceType = 'M├│vil';
++  else if (!ua) deviceType = 'No identificado';
++
++  return {
++    userAgent: ua,
++    sistemaOperativo: os,
++    navegador: browser.slice(0, 150),
++    tipoDispositivo: deviceType,
++    modalidad: platform === 'android' ? 'ANDROID_APP' : platform === 'pwa' ? 'PWA' : 'WEB',
++  };
++}
++
++
++
+ function base64UrlEncode(bytes) {
+   let binary = '';
+   for (const byte of bytes) binary += String.fromCharCode(byte);
+@@ -371,19 +429,25 @@ async function startOAuth(request, env, provider) {
+   requireConfig(env, required);
+ 
+   const requestUrl = new URL(request.url);
+-  const platform = requestUrl.searchParams.get('platform') === 'android' ? 'android' : 'web';
++  const requestedPlatform = text(requestUrl.searchParams.get('platform')).toLowerCase();
++  const platform = requestedPlatform === 'android' ? 'android' : requestedPlatform === 'pwa' ? 'pwa' : 'web';
++  const client = clientMetadata(request, platform);
++
+   const nonce = randomToken(32);
+   const codeVerifier = randomToken(48);
+   const codeChallenge = await sha256Base64Url(codeVerifier);
+ 
+-  const transactionId = await saveOAuthTransaction(env, {
+-    nonce,
+-    codeVerifier,
+-    provider,
+-    platform,
+-    redirectUri: callbackUrl(env, provider),
+-    createdAt: Date.now(),
+-  });
++
++const transactionId = await saveOAuthTransaction(env, {
++  nonce,
++  codeVerifier,
++  provider,
++  platform,
++  client,
++  redirectUri: callbackUrl(env, provider),
++  createdAt: Date.now(),
++});
++
+ 
+   const authorizeUrl = provider === 'google'
+     ? buildGoogleAuthorizeUrl(env, transactionId, nonce, codeChallenge)
+@@ -728,21 +792,26 @@ async function callAppsScript(env, action, data) {
+   };
+ }
+ 
+-async function loginFederated(env, identity, request) {
+-  const platform =
+-    request.headers.get('Sec-CH-UA-Platform') || 'web';
+ 
+-  const device =
+-    request.headers.get('User-Agent') || '';
++async function loginFederated(env, identity, request, transaction = {}) {
++  const client = transaction?.client || clientMetadata(request, transaction?.platform || 'web');
++  const platform = transaction?.platform === 'android' ? 'Android' : transaction?.platform === 'pwa' ? 'PWA' : 'Web';
++
+ 
+   const result = await callAppsScript(
+     env,
+     'auth_v2_login_federado',
+-    {
+-      ...identity,
+-      plataforma: text(platform).slice(0, 100),
+-      dispositivo: text(device).slice(0, 200),
+-    }
++
++{
++  ...identity,
++  plataforma: platform,
++  dispositivo: text(client.userAgent || request.headers.get('User-Agent')).slice(0, 500),
++  sistemaOperativo: text(client.sistemaOperativo).slice(0, 80),
++  navegador: text(client.navegador).slice(0, 150),
++  tipoDispositivo: text(client.tipoDispositivo).slice(0, 50),
++  modalidad: text(client.modalidad || (transaction?.platform === 'android' ? 'ANDROID_APP' : 'WEB')).slice(0, 40),
++}
++
+   );
+ 
+ console.log('AUTH_DIAGNOSTICO', JSON.stringify({
+@@ -882,7 +951,7 @@ async function handleOAuthCallback(request, env, provider) {
+       transaction,
+       env
+     );
+-    const result = await loginFederated(env, identity, request);
++    const result = await loginFederated(env, identity, request, transaction);
+     const sessionSecret = result.sesion.sessionSecret;
+ 
+     if (transaction.platform === 'android') {
