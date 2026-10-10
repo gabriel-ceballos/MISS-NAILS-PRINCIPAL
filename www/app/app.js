@@ -1386,6 +1386,42 @@ var app = document.querySelector(".mn-app");
 var loginScreen = document.querySelector("#mn-login");
 var authRetry = document.querySelector("#mn-auth-retry");
 var authRetryButton = document.querySelector("#mn-auth-retry-button");
+var authSplash = document.querySelector("#mn-auth-splash");
+var SESSION_HINT_KEY = "mn_session_was_authenticated_v1";
+var SPLASH_MS = 620;
+var SKELETON_MS = 780;
+var transitionRunning = false;
+var lastKnownAuthenticated = false;
+var resumeValidationRunning = false;
+function readSessionHint() {
+  try {
+    return localStorage.getItem(SESSION_HINT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function writeSessionHint(value) {
+  try {
+    if (value) localStorage.setItem(SESSION_HINT_KEY, "1");
+    else localStorage.removeItem(SESSION_HINT_KEY);
+  } catch {
+  }
+}
+function esperar(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function mostrarSplash() {
+  if (authSplash) authSplash.hidden = false;
+  document.body.classList.add("mn-auth-starting");
+  document.body.classList.remove("mn-auth-required", "mn-auth-checking");
+  login.hide();
+  app.hidden = true;
+  app.inert = true;
+  app.setAttribute("aria-hidden", "true");
+}
+function ocultarSplash() {
+  if (authSplash) authSplash.hidden = true;
+}
 if (!app || !loginScreen) {
   throw new Error("MISS NAILS: estructura principal incompleta.");
 }
@@ -1423,22 +1459,41 @@ var login = initLogin({
   onAuthenticated: () => mostrarAplicacion()
 });
 var catalogoInicializado = false;
-function mostrarAplicacion(estadoSesion = null) {
-  login.hide();
+async function mostrarAplicacion(estadoSesion = null, { conLogo = true } = {}) {
+  if (transitionRunning) return;
+  transitionRunning = true;
+  lastKnownAuthenticated = true;
+  writeSessionHint(true);
   if (authRetry) authRetry.hidden = true;
-  app.hidden = false;
-  app.inert = false;
-  app.removeAttribute("aria-hidden");
-  document.body.classList.remove("mn-auth-required", "mn-auth-checking", "mn-auth-starting");
-  location.hash = "#catalogo";
-  router.renderView();
-  if (!catalogoInicializado) {
-    catalogoInicializado = true;
-    initCatalog();
+  try {
+    if (conLogo) {
+      mostrarSplash();
+      await esperar(SPLASH_MS);
+    }
+    login.hide();
+    app.hidden = false;
+    app.inert = false;
+    app.removeAttribute("aria-hidden");
+    document.body.classList.remove("mn-auth-required", "mn-auth-starting");
+    document.body.classList.add("mn-auth-checking");
+    ocultarSplash();
+    location.hash = "#catalogo";
+    router.renderView();
+    if (!catalogoInicializado) {
+      catalogoInicializado = true;
+      initCatalog();
+    }
+    void actualizarCuenta(estadoSesion);
+    await esperar(SKELETON_MS);
+    document.body.classList.remove("mn-auth-checking");
+  } finally {
+    transitionRunning = false;
   }
-  void actualizarCuenta(estadoSesion);
 }
 function mostrarLogin() {
+  lastKnownAuthenticated = false;
+  writeSessionHint(false);
+  ocultarSplash();
   if (authRetry) authRetry.hidden = true;
   app.inert = true;
   app.setAttribute("aria-hidden", "true");
@@ -1448,11 +1503,12 @@ function mostrarLogin() {
   login.show();
 }
 function mostrarErrorComunicacion() {
-  app.hidden = false;
+  app.hidden = true;
   app.inert = true;
   app.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("mn-auth-required", "mn-auth-starting");
-  document.body.classList.add("mn-auth-checking");
+  document.body.classList.remove("mn-auth-checking", "mn-auth-starting");
+  document.body.classList.add("mn-auth-required");
+  ocultarSplash();
   login.hide();
   if (authRetry) authRetry.hidden = false;
 }
@@ -1490,8 +1546,9 @@ function iniciales(texto) {
 document.querySelector(".logout")?.addEventListener(
   "click",
   async () => {
-    await cerrarSesion();
+    writeSessionHint(false);
     mostrarLogin();
+    await cerrarSesion();
   }
 );
 async function iniciarAplicacion() {
@@ -1510,23 +1567,38 @@ async function iniciarAplicacion() {
       }
     }
   }
+  const url = new URL(window.location.href);
+  const retornoLoginCorrecto = url.searchParams.get("auth") === "ok";
+  const pistaSesion = readSessionHint();
+  if (!pistaSesion && !retornoLoginCorrecto) {
+    ocultarSplash();
+    document.body.classList.remove("mn-auth-starting", "mn-auth-checking");
+    document.body.classList.add("mn-auth-required");
+    login.show();
+  } else {
+    mostrarSplash();
+  }
   const estado = await resolverSesion();
   if (esAndroidNativo && retornoNativoPromise) {
     const procesado = await retornoNativoPromise;
-    if (procesado) {
-      return;
-    }
+    if (procesado) return;
   }
   if (estado.autenticada) {
-    mostrarAplicacion(estado);
+    await mostrarAplicacion(estado, { conLogo: !pistaSesion && !retornoLoginCorrecto });
   } else if (estado.errorComunicacion) {
     mostrarErrorComunicacion();
   } else {
     mostrarLogin();
   }
+  if (url.searchParams.has("auth") || url.searchParams.has("auth_error")) {
+    url.searchParams.delete("auth");
+    url.searchParams.delete("auth_error");
+    history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }
 }
 async function reintentarAutenticacion() {
   if (authRetry) authRetry.hidden = true;
+  ocultarSplash();
   document.body.classList.add("mn-auth-checking");
   document.body.classList.remove("mn-auth-required", "mn-auth-starting");
   app.hidden = false;
@@ -1538,6 +1610,29 @@ authRetryButton?.addEventListener("click", () => {
   void reintentarAutenticacion();
 });
 void iniciarAplicacion();
+if (esAndroidNativo) {
+  void App.addListener("appStateChange", ({ isActive }) => {
+    if (!isActive || resumeValidationRunning || transitionRunning) return;
+    if (!lastKnownAuthenticated && !readSessionHint()) return;
+    resumeValidationRunning = true;
+    void (async () => {
+      try {
+        mostrarSplash();
+        const estado = await resolverSesion();
+        if (estado.autenticada) {
+          await mostrarAplicacion(estado, { conLogo: false });
+        } else if (estado.errorComunicacion) {
+          mostrarErrorComunicacion();
+        } else {
+          mostrarLogin();
+        }
+      } finally {
+        resumeValidationRunning = false;
+      }
+    })();
+  }).catch(() => {
+  });
+}
 var frame = 0;
 function refreshContext() {
   if (frame || app.hidden) {
