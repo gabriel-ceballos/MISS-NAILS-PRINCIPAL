@@ -35,60 +35,57 @@ function text(value) {
 }
 
 
+
 function clientMetadata(request, platform) {
-  const ua = text(request.headers.get('User-Agent')).slice(0, 500);
-  const platformHint = text(request.headers.get('Sec-CH-UA-Platform'))
-    .replace(/^"|"$/g, '')
-    .slice(0, 80);
-  const brands = text(request.headers.get('Sec-CH-UA')).slice(0, 300);
+  const ua = text(request.headers.get("User-Agent")).slice(0, 500);
 
-  let os = platformHint;
-  if (!os) {
-    if (/Android/i.test(ua)) os = 'Android';
-    else if (/iPhone|iPad|iPod|iOS/i.test(ua)) os = 'iOS';
-    else if (/Windows/i.test(ua)) os = 'Windows';
-    else if (/Mac OS X|Macintosh/i.test(ua)) os = 'macOS';
-    else if (/CrOS/i.test(ua)) os = 'ChromeOS';
-    else if (/Linux/i.test(ua)) os = 'Linux';
-    else os = 'No identificado';
+  const platformHint = text(
+    request.headers.get("Sec-CH-UA-Platform")
+  ).replace(/^"|"$/g, "").slice(0, 80);
+
+  let sistemaOperativo = platformHint;
+
+  if (!sistemaOperativo) {
+    if (/Android/i.test(ua)) sistemaOperativo = "Android";
+    else if (/iPhone|iPad|iPod|iOS/i.test(ua)) sistemaOperativo = "iOS";
+    else if (/Windows/i.test(ua)) sistemaOperativo = "Windows";
+    else if (/Mac OS X|Macintosh/i.test(ua)) sistemaOperativo = "macOS";
+    else if (/CrOS/i.test(ua)) sistemaOperativo = "ChromeOS";
+    else if (/Linux/i.test(ua)) sistemaOperativo = "Linux";
+    else sistemaOperativo = "No identificado";
   }
 
-  let browser = '';
-  if (brands) {
-    try {
-      const parsed = JSON.parse(brands);
-      if (Array.isArray(parsed)) {
-        browser = parsed.map(item => text(item?.brand))
-          .filter(Boolean)
-          .filter(name => !/Not\s*A\s*Brand/i.test(name))
-          .join(', ');
-      }
-    } catch {}
-  }
-  if (!browser) {
-    if (/Edg\//i.test(ua)) browser = 'Microsoft Edge';
-    else if (/OPR\//i.test(ua)) browser = 'Opera';
-    else if (/CriOS\//i.test(ua)) browser = 'Chrome iOS';
-    else if (/FxiOS\//i.test(ua)) browser = 'Firefox iOS';
-    else if (/Firefox\//i.test(ua)) browser = 'Firefox';
-    else if (/Chrome\//i.test(ua)) browser = 'Chrome/Chromium';
-    else if (/Safari\//i.test(ua)) browser = 'Safari';
-    else browser = 'No identificado';
-  }
+  let navegador = "No identificado";
 
-  let deviceType = 'Escritorio';
-  if (/iPad|Tablet/i.test(ua)) deviceType = 'Tableta';
-  else if (/Mobile|Android|iPhone|iPod/i.test(ua)) deviceType = 'Móvil';
-  else if (!ua) deviceType = 'No identificado';
+  if (/Edg\//i.test(ua)) navegador = "Microsoft Edge";
+  else if (/OPR\//i.test(ua)) navegador = "Opera";
+  else if (/CriOS\//i.test(ua)) navegador = "Chrome iOS";
+  else if (/FxiOS\//i.test(ua)) navegador = "Firefox iOS";
+  else if (/Firefox\//i.test(ua)) navegador = "Firefox";
+  else if (/Chrome\//i.test(ua)) navegador = "Chrome";
+  else if (/Safari\//i.test(ua)) navegador = "Safari";
+
+  let tipoDispositivo = "Escritorio";
+
+  if (/iPad|Tablet/i.test(ua)) tipoDispositivo = "Tableta";
+  else if (/Mobile|Android|iPhone|iPod/i.test(ua)) {
+    tipoDispositivo = "Móvil";
+  } else if (!ua) {
+    tipoDispositivo = "No identificado";
+  }
 
   return {
     userAgent: ua,
-    sistemaOperativo: os,
-    navegador: browser.slice(0, 150),
-    tipoDispositivo: deviceType,
-    modalidad: platform === 'android' ? 'ANDROID_APP' : platform === 'pwa' ? 'PWA' : 'WEB',
+    sistemaOperativo,
+    navegador,
+    tipoDispositivo,
+    modalidad:
+      platform === "android" ? "ANDROID_APP" :
+      platform === "pwa" ? "PWA" :
+      "WEB"
   };
 }
+
 
 
 
