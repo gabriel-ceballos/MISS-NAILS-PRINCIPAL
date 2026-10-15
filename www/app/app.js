@@ -1268,6 +1268,12 @@ async function procesarRetornoNativo(urlRecibida) {
     window.location.replace(`/?auth_error=${encodeURIComponent(error)}`);
     return true;
   }
+  const authStep = url.searchParams.get("auth_step");
+  const challenge = url.searchParams.get("challenge") || "";
+  if (authStep === "activation" && /^[A-Za-z0-9_-]{32,128}$/.test(challenge)) {
+    window.location.replace(`/?auth_step=activation&challenge=${encodeURIComponent(challenge)}`);
+    return true;
+  }
   const ticket = url.searchParams.get("ticket") || "";
   if (!/^[A-Za-z0-9_-]{32,128}$/.test(ticket)) {
     window.location.replace("/?auth_error=ERROR_AUTENTICACION");
@@ -1296,6 +1302,56 @@ async function procesarRetornoNativo(urlRecibida) {
     return true;
   }
 }
+async function verificarActivacionFederada(challengeId, codigo) {
+  const challenge = String(challengeId || "").trim();
+  const code = String(codigo || "").trim().toUpperCase();
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(challenge) || !/^[A-F0-9]{8}$/.test(code)) {
+    throw new Error("CODIGO_INVALIDO");
+  }
+  const respuesta = await fetch(`${WORKER_URL}/auth/federated/activation/verify`, {
+    method: "POST",
+    credentials: "include",
+    cache: "no-store",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ challengeId: challenge, codigo: code })
+  });
+  const resultado = await respuesta.json().catch(() => null);
+  if (!respuesta.ok || !resultado || resultado.ok !== true) {
+    const error = resultado?.error || "ACTIVACION_NO_DISPONIBLE";
+    const mensajes = {
+      CODIGO_INVALIDO: "El c\xF3digo no es correcto. Revisa el correo e int\xE9ntalo nuevamente.",
+      ACTIVACION_EXPIRADA: "El c\xF3digo caduc\xF3. Inicia sesi\xF3n nuevamente para solicitar otro.",
+      ACTIVACION_BLOQUEADA: "Se alcanz\xF3 el l\xEDmite de intentos. Inicia sesi\xF3n nuevamente.",
+      ACTIVACION_INTENTAR_MAS_TARDE: "Espera un momento antes de intentarlo nuevamente.",
+      ACTIVACION_NO_DISPONIBLE: "No fue posible completar la activaci\xF3n. Inicia sesi\xF3n nuevamente."
+    };
+    throw new Error(mensajes[error] || "No fue posible validar el c\xF3digo.");
+  }
+  if (resultado.native === true) {
+    const ticket = String(resultado.ticket || "");
+    if (!/^[A-Za-z0-9_-]{32,128}$/.test(ticket)) {
+      throw new Error("No fue posible completar la sesi\xF3n nativa.");
+    }
+    const intercambio = await fetch(`${WORKER_URL}/auth/native/exchange`, {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ ticket })
+    });
+    const canje = await intercambio.json().catch(() => null);
+    if (!intercambio.ok || !canje || canje.ok !== true) {
+      throw new Error("No fue posible completar la sesi\xF3n de Android. Int\xE9ntalo nuevamente.");
+    }
+  }
+  const destino = new URL(window.location.href);
+  destino.search = "";
+  destino.searchParams.set("auth", "ok");
+  window.location.replace(destino.toString());
+}
 
 // app/app.js
 init_dist();
@@ -1313,6 +1369,9 @@ var ERRORES_AUTENTICACION = {
   TRANSACCION_INVALIDA: "La solicitud de acceso ya no es v\xE1lida. Int\xE9ntalo nuevamente.",
   TRANSACCION_EXPIRADA: "La solicitud de acceso expir\xF3. Int\xE9ntalo nuevamente.",
   IDENTIDAD_NO_VINCULADA: "Esta cuenta no est\xE1 vinculada a un cliente autorizado de MISS NAILS.",
+  ACTIVACION_NO_DISPONIBLE: "No fue posible iniciar la activaci\xF3n. Comprueba que utilizas el correo registrado y vuelve a intentarlo.",
+  ACTIVACION_ENVIO_FALLIDO: "No pudimos enviar el c\xF3digo de activaci\xF3n. Int\xE9ntalo nuevamente m\xE1s tarde.",
+  ACTIVACION_INTENTAR_MAS_TARDE: "Se alcanz\xF3 el l\xEDmite temporal de solicitudes. Espera un momento e int\xE9ntalo de nuevo.",
   IDENTIDAD_DESACTIVADA: "Esta identidad de acceso est\xE1 desactivada.",
   CLIENTE_DESACTIVADO: "El acceso de este cliente est\xE1 desactivado.",
   CLIENTE_NO_ENCONTRADO: "No existe un cliente autorizado para esta identidad.",
@@ -1335,7 +1394,13 @@ function initLogin({ onAuthenticated }) {
   const microsoft = document.querySelector("#mn-login-microsoft");
   const message = document.querySelector("#mn-login-message");
   const status = document.querySelector("#mn-login-status");
-  if (!screen || !google || !microsoft || !message || !status) {
+  const activationForm = document.querySelector("#mn-activation-form");
+  const activationCode = document.querySelector("#mn-activation-code");
+  const activationSubmit = document.querySelector("#mn-activation-submit");
+  const activationCancel = document.querySelector("#mn-activation-cancel");
+  let challengeId = "";
+  let activationMode = false;
+  if (!screen || !google || !microsoft || !message || !status || !activationForm || !activationCode || !activationSubmit || !activationCancel) {
     throw new Error("MISS NAILS: estructura de acceso federado incompleta.");
   }
   function mostrarMensaje(texto) {
@@ -1343,8 +1408,9 @@ function initLogin({ onAuthenticated }) {
     message.hidden = !texto;
   }
   function bloquear(bloqueado, texto = "") {
-    google.disabled = bloqueado;
-    microsoft.disabled = bloqueado;
+    google.disabled = bloqueado || activationMode;
+    microsoft.disabled = bloqueado || activationMode;
+    activationSubmit.disabled = bloqueado;
     google.setAttribute("aria-busy", String(bloqueado));
     microsoft.setAttribute("aria-busy", String(bloqueado));
     status.textContent = texto || "Selecciona un proveedor para continuar.";
@@ -1360,11 +1426,66 @@ function initLogin({ onAuthenticated }) {
       bloquear(false);
     }
   }
+  function limpiarParametrosActivacion() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("auth_step");
+    url.searchParams.delete("challenge");
+    window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+  }
+  async function enviarCodigoActivacion(event) {
+    event.preventDefault();
+    if (!challengeId) {
+      mostrarMensaje("La solicitud de activaci\xF3n ya no es v\xE1lida. Inicia sesi\xF3n nuevamente.");
+      return;
+    }
+    const codigo = activationCode.value.trim().toUpperCase();
+    if (!/^[A-F0-9]{8}$/.test(codigo)) {
+      mostrarMensaje("Escribe el c\xF3digo de 8 caracteres que recibiste por correo.");
+      activationCode.focus();
+      return;
+    }
+    mostrarMensaje("");
+    bloquear(true, "Verificando el c\xF3digo de activaci\xF3n\u2026");
+    try {
+      await verificarActivacionFederada(challengeId, codigo);
+    } catch (error) {
+      mostrarMensaje(error.message || "No fue posible verificar el c\xF3digo.");
+      bloquear(false, "Introduce el c\xF3digo enviado al correo registrado.");
+      activationCode.focus();
+    }
+  }
+  activationForm.addEventListener("submit", enviarCodigoActivacion);
+  activationCancel.addEventListener("click", () => {
+    challengeId = "";
+    activationMode = false;
+    activationForm.hidden = true;
+    google.hidden = false;
+    microsoft.hidden = false;
+    limpiarParametrosActivacion();
+    mostrarMensaje("");
+    bloquear(false);
+    google.focus();
+  });
   google.addEventListener("click", () => entrar("google", google));
   microsoft.addEventListener("click", () => entrar("microsoft", microsoft));
   return {
     show() {
       screen.hidden = false;
+      const params = new URLSearchParams(window.location.search);
+      const step = params.get("auth_step");
+      const candidate = params.get("challenge") || "";
+      activationMode = step === "activation" && /^[A-Za-z0-9_-]{32,128}$/.test(candidate);
+      challengeId = activationMode ? candidate : "";
+      activationForm.hidden = !activationMode;
+      google.hidden = activationMode;
+      microsoft.hidden = activationMode;
+      if (activationMode) {
+        bloquear(false, "Introduce el c\xF3digo enviado al correo registrado.");
+        mostrarMensaje("Para activar tu cuenta, introduce el c\xF3digo de un solo uso. Caduca en 10 minutos.");
+        activationCode.value = "";
+        activationCode.focus();
+        return;
+      }
       bloquear(false);
       const error = mensajeErrorDesdeURL();
       mostrarMensaje(error);
@@ -1372,6 +1493,9 @@ function initLogin({ onAuthenticated }) {
     },
     hide() {
       screen.hidden = true;
+      activationForm.hidden = true;
+      challengeId = "";
+      activationMode = false;
       mostrarMensaje("");
     },
     showError(texto) {
@@ -1413,7 +1537,7 @@ function esperar(ms) {
 function mostrarSplash() {
   if (authSplash) authSplash.hidden = false;
   document.body.classList.add("mn-auth-starting");
-  document.body.classList.remove("mn-auth-required", "mn-auth-checking");
+  document.body.classList.remove("mn-auth-required", "mn-auth-checking", "mn-auth-revealing");
   login.hide();
   app.hidden = true;
   app.inert = true;
@@ -1475,7 +1599,8 @@ async function mostrarAplicacion(estadoSesion = null, { conLogo = true } = {}) {
     app.inert = false;
     app.removeAttribute("aria-hidden");
     document.body.classList.remove("mn-auth-required", "mn-auth-starting");
-    document.body.classList.add("mn-auth-checking");
+    document.body.classList.remove("mn-auth-checking");
+    document.body.classList.add("mn-auth-revealing");
     ocultarSplash();
     location.hash = "#catalogo";
     router.renderView();
@@ -1485,7 +1610,7 @@ async function mostrarAplicacion(estadoSesion = null, { conLogo = true } = {}) {
     }
     void actualizarCuenta(estadoSesion);
     await esperar(SKELETON_MS);
-    document.body.classList.remove("mn-auth-checking");
+    document.body.classList.remove("mn-auth-revealing");
   } finally {
     transitionRunning = false;
   }
@@ -1498,7 +1623,7 @@ function mostrarLogin() {
   app.inert = true;
   app.setAttribute("aria-hidden", "true");
   app.hidden = true;
-  document.body.classList.remove("mn-auth-checking", "mn-auth-starting");
+  document.body.classList.remove("mn-auth-checking", "mn-auth-starting", "mn-auth-revealing");
   document.body.classList.add("mn-auth-required");
   login.show();
 }
@@ -1506,7 +1631,7 @@ function mostrarErrorComunicacion() {
   app.hidden = true;
   app.inert = true;
   app.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("mn-auth-checking", "mn-auth-starting");
+  document.body.classList.remove("mn-auth-checking", "mn-auth-starting", "mn-auth-revealing");
   document.body.classList.add("mn-auth-required");
   ocultarSplash();
   login.hide();
@@ -1572,7 +1697,7 @@ async function iniciarAplicacion() {
   const pistaSesion = readSessionHint();
   if (!pistaSesion && !retornoLoginCorrecto) {
     ocultarSplash();
-    document.body.classList.remove("mn-auth-starting", "mn-auth-checking");
+    document.body.classList.remove("mn-auth-starting", "mn-auth-checking", "mn-auth-revealing");
     document.body.classList.add("mn-auth-required");
     login.show();
   } else {
@@ -1598,12 +1723,7 @@ async function iniciarAplicacion() {
 }
 async function reintentarAutenticacion() {
   if (authRetry) authRetry.hidden = true;
-  ocultarSplash();
-  document.body.classList.add("mn-auth-checking");
-  document.body.classList.remove("mn-auth-required", "mn-auth-starting");
-  app.hidden = false;
-  app.inert = true;
-  app.setAttribute("aria-hidden", "true");
+  mostrarSplash();
   await iniciarAplicacion();
 }
 authRetryButton?.addEventListener("click", () => {

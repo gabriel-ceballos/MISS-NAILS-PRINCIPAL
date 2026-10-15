@@ -734,7 +734,7 @@ if (!allowedMicrosoftTenants(env).includes(tid)) {
     subject: payload.sub,
     tenantId: tid,
     email,
-    emailVerificado: true,
+    emailVerificado: payload.email_verified === true,
   };
 
 }
@@ -869,6 +869,12 @@ function mapAuthError(error) {
 
   const direct = new Set([
     'IDENTIDAD_NO_VINCULADA',
+    'ACTIVACION_NO_DISPONIBLE',
+    'ACTIVACION_ENVIO_FALLIDO',
+    'ACTIVACION_INTENTAR_MAS_TARDE',
+    'ACTIVACION_EXPIRADA',
+    'ACTIVACION_BLOQUEADA',
+    'CODIGO_INVALIDO',
     'IDENTIDAD_DESACTIVADA',
     'CLIENTE_NO_ENCONTRADO',
     'CLIENTE_DESACTIVADO',
@@ -948,7 +954,33 @@ async function handleOAuthCallback(request, env, provider) {
       transaction,
       env
     );
-    const result = await loginFederated(env, identity, request, transaction);
+    let result;
+    try {
+      result = await loginFederated(env, identity, request, transaction);
+    } catch (loginError) {
+      if (mapAuthError(loginError) !== 'IDENTIDAD_NO_VINCULADA') throw loginError;
+
+      const challengeId = randomToken(24);
+      const preparado = await callAppsScript(
+        env,
+        'auth_v2_preparar_activacion_federada',
+        {
+          ...identity,
+          challengeId,
+          plataforma: transaction.platform || 'web'
+        }
+      );
+      if (preparado.status < 200 || preparado.status >= 300 || preparado.json?.ok !== true) {
+        throw new Error(preparado.json?.motivo || 'ACTIVACION_NO_DISPONIBLE');
+      }
+      return redirectResponse(
+        oauthReturnUrl(env, transaction, {
+          auth_step: 'activation',
+          challenge: challengeId
+        }),
+        { 'Set-Cookie': clearOauthCookie() }
+      );
+    }
     const sessionSecret = result.sesion.sessionSecret;
 
     if (transaction.platform === 'android') {
@@ -1021,6 +1053,69 @@ async function handleNativeHandoffExchange(request, env) {
     200,
     {'Set-Cookie': sessionCookie(handoff.sessionSecret)}
   );
+}
+
+async function handleFederatedActivationVerify(request, env) {
+  if (request.method !== 'POST' || !validateOrigin(request, env)) {
+    return jsonResponse(request, env, { ok: false, error: 'ORIGEN_NO_AUTORIZADO' }, 403);
+  }
+  const contentType = request.headers.get('Content-Type') || '';
+  if (!contentType.toLowerCase().includes('application/json')) {
+    return jsonResponse(request, env, { ok: false, error: 'CONTENT_TYPE_INVALIDO' }, 415);
+  }
+  const body = await request.json().catch(() => ({}));
+  const challengeId = text(body.challengeId);
+  const codigo = text(body.codigo).toUpperCase();
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(challengeId) || !/^[A-F0-9]{8}$/.test(codigo)) {
+    return jsonResponse(request, env, { ok: false, error: 'CODIGO_INVALIDO' }, 400);
+  }
+
+  try {
+    const verificacion = await callAppsScript(
+      env,
+      'auth_v2_verificar_activacion_federada',
+      { challengeId, codigo }
+    );
+    if (verificacion.status < 200 || verificacion.status >= 300 || verificacion.json?.ok !== true) {
+      const motivo = text(verificacion.json?.motivo) || 'CODIGO_INVALIDO';
+      const status = ['ACTIVACION_EXPIRADA', 'ACTIVACION_BLOQUEADA'].includes(motivo) ? 401 : 400;
+      return jsonResponse(request, env, { ok: false, error: motivo }, status);
+    }
+
+    const plataforma = ['android', 'pwa', 'web'].includes(verificacion.json.plataforma)
+      ? verificacion.json.plataforma : 'web';
+    const identity = verificacion.json.identidad;
+    if (!identity || !text(identity.subject) || !text(identity.issuer)) {
+      return jsonResponse(request, env, { ok: false, error: 'ACTIVACION_NO_DISPONIBLE' }, 502);
+    }
+
+    const result = await loginFederated(env, identity, request, { platform: plataforma });
+    const sessionSecret = text(result?.sesion?.sessionSecret);
+    if (!sessionSecret) {
+      return jsonResponse(request, env, { ok: false, error: 'SESSION_SECRET_AUSENTE' }, 502);
+    }
+
+    if (plataforma === 'android') {
+      const ticket = await saveOAuthTransaction(env, {
+        type: 'native_handoff',
+        sessionSecret,
+        platform: 'android',
+        createdAt: Date.now(),
+      });
+      return jsonResponse(request, env, { ok: true, native: true, ticket }, 200);
+    }
+
+    return jsonResponse(request, env, { ok: true }, 200, {
+      'Set-Cookie': sessionCookie(sessionSecret),
+      'Cache-Control': 'no-store',
+    });
+  } catch (error) {
+    console.error('AUTH_DIAGNOSTICO', JSON.stringify({
+      etapa: 'federated_activation_verify',
+      error: mapAuthError(error)
+    }));
+    return jsonResponse(request, env, { ok: false, error: mapAuthError(error) }, 400);
+  }
 }
 
 async function resolveSession(request, env) {
@@ -1399,6 +1494,10 @@ export default {
 
       if (url.pathname === '/auth/native/exchange' && request.method === 'POST') {
         return await handleNativeHandoffExchange(request, env);
+      }
+
+      if (url.pathname === '/auth/federated/activation/verify' && request.method === 'POST') {
+        return await handleFederatedActivationVerify(request, env);
       }
 
       if (url.pathname === '/api/session' && request.method === 'GET') {

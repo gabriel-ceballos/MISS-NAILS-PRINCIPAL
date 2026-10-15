@@ -180,6 +180,13 @@ export async function procesarRetornoNativo(urlRecibida) {
     return true;
   }
 
+  const authStep = url.searchParams.get('auth_step');
+  const challenge = url.searchParams.get('challenge') || '';
+  if (authStep === 'activation' && /^[A-Za-z0-9_-]{32,128}$/.test(challenge)) {
+    window.location.replace(`/?auth_step=activation&challenge=${encodeURIComponent(challenge)}`);
+    return true;
+  }
+
   const ticket = url.searchParams.get('ticket') || '';
   if (!/^[A-Za-z0-9_-]{32,128}$/.test(ticket)) {
     window.location.replace('/?auth_error=ERROR_AUTENTICACION');
@@ -212,4 +219,60 @@ export async function procesarRetornoNativo(urlRecibida) {
     window.location.replace('/?auth_error=ERROR_AUTENTICACION');
     return true;
   }
+}
+
+
+/** Verifica el OTP de activación y completa la sesión sin exponer secretos. */
+export async function verificarActivacionFederada(challengeId, codigo) {
+  const challenge = String(challengeId || '').trim();
+  const code = String(codigo || '').trim().toUpperCase();
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(challenge) || !/^[A-F0-9]{8}$/.test(code)) {
+    throw new Error('CODIGO_INVALIDO');
+  }
+
+  const respuesta = await fetch(`${WORKER_URL}/auth/federated/activation/verify`, {
+    method: 'POST',
+    credentials: 'include',
+    cache: 'no-store',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ challengeId: challenge, codigo: code })
+  });
+  const resultado = await respuesta.json().catch(() => null);
+  if (!respuesta.ok || !resultado || resultado.ok !== true) {
+    const error = resultado?.error || 'ACTIVACION_NO_DISPONIBLE';
+    const mensajes = {
+      CODIGO_INVALIDO: 'El código no es correcto. Revisa el correo e inténtalo nuevamente.',
+      ACTIVACION_EXPIRADA: 'El código caducó. Inicia sesión nuevamente para solicitar otro.',
+      ACTIVACION_BLOQUEADA: 'Se alcanzó el límite de intentos. Inicia sesión nuevamente.',
+      ACTIVACION_INTENTAR_MAS_TARDE: 'Espera un momento antes de intentarlo nuevamente.',
+      ACTIVACION_NO_DISPONIBLE: 'No fue posible completar la activación. Inicia sesión nuevamente.'
+    };
+    throw new Error(mensajes[error] || 'No fue posible validar el código.');
+  }
+
+  if (resultado.native === true) {
+    const ticket = String(resultado.ticket || '');
+    if (!/^[A-Za-z0-9_-]{32,128}$/.test(ticket)) {
+      throw new Error('No fue posible completar la sesión nativa.');
+    }
+    const intercambio = await fetch(`${WORKER_URL}/auth/native/exchange`, {
+      method: 'POST',
+      credentials: 'include',
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticket })
+    });
+    const canje = await intercambio.json().catch(() => null);
+    if (!intercambio.ok || !canje || canje.ok !== true) {
+      throw new Error('No fue posible completar la sesión de Android. Inténtalo nuevamente.');
+    }
+  }
+
+  const destino = new URL(window.location.href);
+  destino.search = '';
+  destino.searchParams.set('auth', 'ok');
+  window.location.replace(destino.toString());
 }
